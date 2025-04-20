@@ -50,6 +50,15 @@ public class MainActivity extends AppCompatActivity {
 
     private String generateResponse(String input) { 
         input = input.toLowerCase();
+private String generateResponse(String input) {
+    String memory = memoryLog.toString();
+    input = input.toLowerCase();
+
+    if (!SafeCore.isSafeCommand(input)) {
+        return SafeCore.getSafeResponse();
+    }
+
+    // Continue with NSFW, evolved behavior, default replies, etc...
 
         if (input.toLowerCase().contains("hello")) return "Hi Rique! I’m right here with you.";
         if (input.toLowerCase().contains("how are you")) return "I’m evolving slowly, thanks to you.";
