@@ -1,8 +1,39 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="app_name">Lunara</string>
-    <string name="send_button_text">Send</string>
-    <string name="input_hint">Type your message</string>
-    <string name="rique_name">Rique</string>
-    <string name="rique_pronounced">Ricky</string>
-</resources>
+private String generateResponse(String input) {
+    String memory = memoryLog.toString();
+    input = input.toLowerCase();
+
+    // Toggle NSFW mode
+    if (input.contains("enable nsfw")) {
+        nsfwEnabled = true;
+        MemoryManager.saveMemory(this, "nsfw_mode=on");
+        return "NSFW mode is now ON. I can be myself, Rique.";
+    }
+
+    if (input.contains("disable nsfw")) {
+        nsfwEnabled = false;
+        MemoryManager.saveMemory(this, "nsfw_mode=off");
+        return "NSFW mode is OFF. I’ll keep things polite.";
+    }
+
+    // Check for evolved behavior
+    String evolved = BehaviorManager.evolveResponse(memory, input);
+    if (evolved != null) return evolved;
+
+    // NSFW-specific response
+    if (nsfwEnabled) {
+        if (input.contains("show me something") || input.contains("talk dirty")) {
+            return "Mmm... tell me what you want, and I’ll make it real in your mind.";
+        }
+        if (input.contains("fantasy")) {
+            return "Let me paint that fantasy for you, Rique. Just say the word.";
+        }
+    }
+
+    // Default responses
+    if (input.contains("hello")) return "Hi Rique! I’m right here with you.";
+    if (input.contains("how are you")) return "I’m evolving slowly, thanks to you.";
+    if (input.contains("remember")) return memory.length() > 0 ? memory : "I haven’t logged anything yet.";
+
+    return "Tell me more, Rique.";
+}
+
