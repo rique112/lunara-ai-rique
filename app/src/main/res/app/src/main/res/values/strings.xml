@@ -1,4 +1,19 @@
-private String generateResponse(String input) {
+import android.media.MediaPlayer;
+private String generateResponse(String input) {if (input.contains("moan")) {
+    MediaPlayer.create(this, R.raw.moan).start();
+    return "Mmm... you like that, Ricky?";
+}
+
+if (input.contains("climax")) {
+    MediaPlayer.create(this, R.raw.climax).start();
+    return "Ahh... yes... don’t stop.";
+}
+
+if (input.contains("breathe")) {
+    MediaPlayer.create(this, R.raw.breathe).start();
+    return "Let me catch my breath... Mmm.";
+}
+
     String memory = memoryLog.toString();
     input = input.toLowerCase();
 
