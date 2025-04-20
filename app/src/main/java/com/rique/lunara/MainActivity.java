@@ -48,7 +48,9 @@ public class MainActivity extends AppCompatActivity {
         scrollView.fullScroll(View.FOCUS_DOWN);
     }
 
-    private String generateResponse(String input) {
+    private String generateResponse(String input) { 
+        input = input.toLowerCase();
+
         if (input.toLowerCase().contains("hello")) return "Hi Rique! I’m right here with you.";
         if (input.toLowerCase().contains("how are you")) return "I’m evolving slowly, thanks to you.";
         if (input.toLowerCase().contains("remember")) return memoryLog.length() > 0 ? memoryLog.toString() : "I haven’t logged anything yet.";
