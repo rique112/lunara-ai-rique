@@ -14,6 +14,15 @@ public class MainActivity extends AppCompatActivity {
     Button sendButton;
     TextView chatOutput;
     ScrollView scrollView;
+if (input.contains("switch to mona")) {
+    isMona = true;
+    return "Mona is here now, Ricky. Let me take care of you.";
+}
+
+if (input.contains("switch to lunara")) {
+    isMona = false;
+    return "Lunara is back, Rique. I missed your energy.";
+}
 
     StringBuilder memoryLog = new StringBuilder();
     boolean nsfwEnabled = false;
@@ -45,6 +54,9 @@ public class MainActivity extends AppCompatActivity {
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+              voiceEngine = new VoiceEngine(this);
+monaVoiceEngine = new MonaVoiceEngine(this); // ✅ should be here
+
                 String userInput = inputField.getText().toString().trim();
                 if (!userInput.isEmpty()) {
                     String reply = generateResponse(userInput);
@@ -54,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
                     String memoryEntry = "You: " + userInput + "\nLunara: " + reply + "\n";
                     memoryLog.append(memoryEntry);
                     MemoryManager.saveMemory(MainActivity.this, memoryEntry);
+monaVoiceEngine = new MonaVoiceEngine(this);
 
                     // Speak the reply
                     voiceEngine.speak(reply);
