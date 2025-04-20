@@ -1,4 +1,6 @@
 package com.rique.lunara;
+private boolean isMona = false;
+private MonaVoiceEngine monaVoiceEngine;
 
 import android.os.Bundle;
 import android.view.View;
