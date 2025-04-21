@@ -47,8 +47,24 @@ public class MainActivity extends AppCompatActivity {
         chatOutput.append(message);
         scrollView.fullScroll(View.FOCUS_DOWN);
     }
+C:\Lunara\usage_log.txt
 
     private String generateResponse(String input) { 
+        File smartAudio = LunaraCore.getSmartAudio();
+    File smartAudio = LunaraCore.getSmartAudio();
+
+if (smartAudio != null && smartAudio.exists()) {
+    MediaPlayer mediaPlayer = new MediaPlayer();
+    try {
+        mediaPlayer.setDataSource(smartAudio.getAbsolutePath());
+        mediaPlayer.prepare();
+        mediaPlayer.start();
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+
+
         input = input.toLowerCase();
 private String generateResponse(String input) {
     String memory = memoryLog.toString();
