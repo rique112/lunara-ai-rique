@@ -63,6 +63,36 @@ if (smartAudio != null && smartAudio.exists()) {
         e.printStackTrace();
     }
 }
+if (input.contains("start fantasy")) {
+    String[] lines = SceneManager.getScene("fantasy");
+    new Thread(() -> {
+        for (String line : lines) {
+            speakWithCurrentVoice(line);
+            try { Thread.sleep(4000); } catch (InterruptedException ignored) {}
+        }
+    }).start();
+
+    BehaviorTracker.track("fantasy");
+    return "";
+}
+
+if (input.contains("aftercare")) {
+    String[] lines = SceneManager.getScene("aftercare");
+    new Thread(() -> {
+        for (String line : lines) {
+            speakWithCurrentVoice(line);
+            try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
+        }
+    }).start();
+
+    BehaviorTracker.track("aftercare");
+    return "";
+}
+
+if (input.contains("what do I love")) {
+    String top = BehaviorTracker.getMostUsedTrigger();
+    return "You seem to enjoy: " + top + ", Ricky.";
+}
 
 
         input = input.toLowerCase();
