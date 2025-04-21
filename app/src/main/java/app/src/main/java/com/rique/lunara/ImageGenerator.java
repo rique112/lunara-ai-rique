@@ -34,4 +34,4 @@ public class ImageGenerator {
             System.err.println("[ImageGenerator] Error while creating image: " + e.getMessage());
         }
     }
-}
+}Added real ImageGenerator.java
