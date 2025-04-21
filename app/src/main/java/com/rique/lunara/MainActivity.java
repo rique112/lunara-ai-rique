@@ -16,7 +16,20 @@ public class MainActivity extends AppCompatActivity {
     Button sendButton;
     TextView chatOutput;
     ScrollView scrollView;
-
+Button imageButton;
+imageButton = findViewById(R.id.imageButton);
+imageButton.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View v) {
+        String prompt = inputField.getText().toString().trim();
+        if (!prompt.isEmpty()) {
+            ImageGenerator imageGenerator = new ImageGenerator();
+            imageGenerator.generateImage(prompt);
+        } else {
+            System.out.println("[MainActivity] No prompt provided for image.");
+        }
+    }
+});
     StringBuilder memoryLog = new StringBuilder(); // basic memory simulation
 
     @Override
