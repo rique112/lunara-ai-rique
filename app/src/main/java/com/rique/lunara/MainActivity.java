@@ -46,7 +46,12 @@ public class MainActivity extends AppCompatActivity {
 
         String response = generateResponse(userInput);
 String evolved = BehaviorTracker.evolveResponse(memory, input);
-return evolved;
+return evolved;// Save pair to training data if learning is on
+if (LearningGate.isLearning()) {
+    BehaviorTracker.track("INPUT: " + userInput);
+    BehaviorTracker.track("RESPONSE: " + evolved);
+}
+
 
         chatOutput.append("You: " + userInput + "\n");
         chatOutput.append("Lunara: " + response + "\n");
