@@ -1,5 +1,5 @@
 package com.rique.lunara;
-
+import com.rique.lunara.KnowledgeTrainer;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.*;
@@ -44,7 +44,8 @@ public class MainActivity extends AppCompatActivity {
         String userInput = inputField.getText().toString().trim();
         if (userInput.isEmpty()) return;
 
-        String response = generateResponse(userInput);
+        String response = generateResponse(String learned = KnowledgeTrainer.lookupLearnedResponse(input);
+if (learned != null) return learned;);
 String evolved = BehaviorTracker.evolveResponse(memory, input);
 return evolved;// Save pair to training data if learning is on
 if (LearningGate.isLearning()) {
