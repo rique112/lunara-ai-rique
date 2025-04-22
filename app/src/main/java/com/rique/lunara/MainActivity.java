@@ -2,81 +2,110 @@ package com.rique.lunara;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ScrollView;
-import android.widget.TextView;
-import android.widget.Toast;
-
+import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
-    private EditText inputField;
-    private Button sendButton, imageButton;
-    private TextView chatOutput;
-    private ScrollView scrollView;
-    private StringBuilder memoryLog;
+    EditText inputField;
+    Button sendButton;
+    TextView chatOutput;
+    ScrollView scrollView;
+    Button deleteMemoryButton;
+
+    VoiceEngine voiceEngine;
+    MonaVoiceEngine monaVoiceEngine;
+
+    boolean useMona = false;
+    boolean nsfwEnabled = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Initialize UI components
         inputField = findViewById(R.id.inputField);
         sendButton = findViewById(R.id.sendButton);
-        imageButton = findViewById(R.id.imageButton);
         chatOutput = findViewById(R.id.chatOutput);
         scrollView = findViewById(R.id.scrollView);
-        memoryLog = new StringBuilder();
+        deleteMemoryButton = findViewById(R.id.deleteMemoryButton);
 
-        // Set up Send Button
-        sendButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String userInput = inputField.getText().toString().trim();
-                if (!userInput.isEmpty()) {
-                    String reply = generateResponse(userInput);
-                    appendChat("You: " + userInput + "\nLunara: " + reply + "\n");
-                    inputField.setText("");
-                } else {
-                    Toast.makeText(MainActivity.this, "Please type a message!", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+        voiceEngine = new VoiceEngine(this);
+        monaVoiceEngine = new MonaVoiceEngine(this);
 
-        // Set up Image Button
-        imageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String prompt = inputField.getText().toString().trim();
-                if (!prompt.isEmpty()) {
-                    generateImage(prompt);
-                } else {
-                    Toast.makeText(MainActivity.this, "Please type a prompt for the image!", Toast.LENGTH_SHORT).show();
-                }
-            }
+        sendButton.setOnClickListener(v -> handleInput());
+        deleteMemoryButton.setOnClickListener(v -> {
+            MemoryManager.clearMemory(this);
+            chatOutput.setText("Memory cleared.");
         });
     }
 
-    // Append messages to chat output
-    private void appendChat(String message) {
-        chatOutput.append(message + "\n");
-        scrollView.post(() -> scrollView.fullScroll(View.FOCUS_DOWN));
+    private void handleInput() {
+        String userInput = inputField.getText().toString().trim();
+        if (userInput.isEmpty()) return;
+
+        String response = generateResponse(userInput);
+
+        chatOutput.append("You: " + userInput + "\n");
+        chatOutput.append("Lunara: " + response + "\n");
+
+        scrollView.fullScroll(View.FOCUS_DOWN);
+        inputField.setText("");
+
+        MemoryManager.saveMemory(this, "You: " + userInput, "input");
+        MemoryManager.saveMemory(this, "Lunara: " + response, "reply");
+
+        if (useMona) monaVoiceEngine.speak(response);
+        else voiceEngine.speak(response);
     }
 
-    // Generate response for user input
     private String generateResponse(String input) {
-        memoryLog.append("User: ").append(input).append("\n");
-        if (input.equalsIgnoreCase("hello")) return "Hi, I'm Lunara!";
-        if (input.equalsIgnoreCase("how are you")) return "I'm here to assist you!";
-        return "Tell me more...";
-    }
+        input = input.toLowerCase();
 
-    // Simulate image generation
-    private void generateImage(String prompt) {
-        // Placeholder for image generation logic
-        Toast.makeText(this, "Generating image for: " + prompt, Toast.LENGTH_SHORT).show();
+        if (input.contains("enable nsfw")) {
+            nsfwEnabled = true;
+            return "NSFW mode activated, Rique.";
+        }
+
+        if (input.contains("disable nsfw")) {
+            nsfwEnabled = false;
+            return "NSFW mode turned off.";
+        }
+
+        if (input.contains("use mona")) {
+            useMona = true;
+            return "Switching to Mona's voice.";
+        }
+
+        if (input.contains("use lunara")) {
+            useMona = false;
+            return "Back to my Lunara voice.";
+        }
+
+        if (input.contains("clear memory")) {
+            MemoryManager.clearMemory(this);
+            return "I’ve forgotten everything, Ricky.";
+        }
+
+        if (input.contains("what do i love")) {
+            return "Your most used scene is: " + SceneManager.getMostUsedScene();
+        }
+
+        if (input.contains("how do you feel")) {
+            return EmotionEngine.getMoodLine(this);
+        }
+
+        if (input.contains("start fantasy")) {
+            String[] lines = SceneManager.getScene("fantasy");
+            for (String line : lines) {
+                if (useMona) monaVoiceEngine.speak(line);
+                else voiceEngine.speak(line);
+            }
+            return "(Fantasy scene started...)";
+        }
+
+        String memory = MemoryManager.loadMemory(this);
+        String evolved = BehaviorTracker.evolveResponse(memory, input);
+        return evolved;
     }
 }
