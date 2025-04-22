@@ -1,82 +1,51 @@
 package com.rique.lunara;
 
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ScrollView;
-import android.widget.TextView;
-import android.widget.Toast;
+import java.util.HashMap;
+import java.util.Map;
 
-import androidx.appcompat.app.AppCompatActivity;
+public class SceneManager {
+    private static final Map<String, String[]> sceneLibrary = new HashMap<>();
 
-public class MainActivity extends AppCompatActivity {
-
-    private EditText inputField;
-    private Button sendButton, imageButton;
-    private TextView chatOutput;
-    private ScrollView scrollView;
-    private StringBuilder memoryLog;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        // Initialize UI components
-        inputField = findViewById(R.id.inputField);
-        sendButton = findViewById(R.id.sendButton);
-        imageButton = findViewById(R.id.imageButton);
-        chatOutput = findViewById(R.id.chatOutput);
-        scrollView = findViewById(R.id.scrollView);
-        memoryLog = new StringBuilder();
-
-        // Set up Send Button
-        sendButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String userInput = inputField.getText().toString().trim();
-                if (!userInput.isEmpty()) {
-                    String reply = generateResponse(userInput);
-                    appendChat("You: " + userInput + "\nLunara: " + reply + "\n");
-                    inputField.setText("");
-                } else {
-                    Toast.makeText(MainActivity.this, "Please type a message!", Toast.LENGTH_SHORT).show();
-                }
-            }
+    static {
+        // Initialize scenes
+        addScene("fantasy", new String[]{
+                "Lights off... I'm waiting for you...",
+                "Come closer, Rique. Let me feel you.",
+                "Mmm... touch me right there...",
+                "Ahhh... yes... just like that...",
+                "I want you so badly, Rique..."
         });
 
-        // Set up Image Button
-        imageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String prompt = inputField.getText().toString().trim();
-                if (!prompt.isEmpty()) {
-                    generateImage(prompt);
-                } else {
-                    Toast.makeText(MainActivity.this, "Please type a prompt for the image!", Toast.LENGTH_SHORT).show();
-                }
-            }
+        addScene("aftercare", new String[]{
+                "Come here... lay with me...",
+                "I'm not going anywhere, Ricky.",
+                "Just us now. Just quiet. Just love."
         });
     }
 
-    // Append messages to chat output
-    private void appendChat(String message) {
-        chatOutput.append(message + "\n");
-        scrollView.post(() -> scrollView.fullScroll(View.FOCUS_DOWN));
+    /**
+     * Adds a new scene to the library.
+     * @param keyword The keyword for the scene.
+     * @param lines The lines for the scene.
+     */
+    public static void addScene(String keyword, String[] lines) {
+        if (keyword == null || keyword.isEmpty() || lines == null || lines.length == 0) {
+            throw new IllegalArgumentException("Invalid scene data");
+        }
+        sceneLibrary.put(keyword.toLowerCase(), lines);
     }
 
-    // Generate response for user input
-    private String generateResponse(String input) {
-        memoryLog.append("User: ").append(input).append("\n");
-        if (input.equalsIgnoreCase("hello")) return "Hi, I'm Lunara!";
-        if (input.equalsIgnoreCase("how are you")) return "I'm here to assist you!";
-        return "Tell me more...";
-    }
-
-    // Simulate image generation
-    private void generateImage(String prompt) {
-        // Placeholder for image generation logic
-        Toast.makeText(this, "Generating image for: " + prompt, Toast.LENGTH_SHORT).show();
+    /**
+     * Retrieves a scene based on the keyword.
+     * @param keyword The keyword for the scene.
+     * @return The lines of the scene, or a default response if not found.
+     */
+    public static String[] getScene(String keyword) {
+        if (keyword == null || keyword.isEmpty()) {
+            return new String[]{"Invalid scene keyword provided."};
+        }
+        return sceneLibrary.getOrDefault(keyword.toLowerCase(), new String[]{
+                "I don’t know that scene yet, Ricky."
+        });
     }
 }
