@@ -45,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
         if (userInput.isEmpty()) return;
 
         String response = generateResponse(userInput);
+String evolved = BehaviorTracker.evolveResponse(memory, input);
+return evolved;
 
         chatOutput.append("You: " + userInput + "\n");
         chatOutput.append("Lunara: " + response + "\n");
