@@ -1,5 +1,5 @@
 package com.rique.lunara;
-import com.rique.lunara.KnowledgeTrainer;
+
 import android.os.Bundle;
 import android.view.View;
 import android.widget.*;
@@ -30,10 +30,8 @@ public class MainActivity extends AppCompatActivity {
         scrollView = findViewById(R.id.scrollView);
         deleteMemoryButton = findViewById(R.id.deleteMemoryButton);
 
-        voiceEngine = new VoiceEngine(this);
-        monaVoiceEngine = new MonaVoiceEngine(this);
-
         sendButton.setOnClickListener(v -> handleInput());
+
         deleteMemoryButton.setOnClickListener(v -> {
             MemoryManager.clearMemory(this);
             chatOutput.setText("Memory cleared.");
@@ -44,27 +42,44 @@ public class MainActivity extends AppCompatActivity {
         String userInput = inputField.getText().toString().trim();
         if (userInput.isEmpty()) return;
 
-        String response = generateResponse(String learned = KnowledgeTrainer.lookupLearnedResponse(input);
-if (learned != null) return learned;);
-String evolved = BehaviorTracker.evolveResponse(memory, input);
-return evolved;// Save pair to training data if learning is on
-if (LearningGate.isLearning()) {
-    BehaviorTracker.track("INPUT: " + userInput);
-    BehaviorTracker.track("RESPONSE: " + evolved);
-}
-
-
         chatOutput.append("You: " + userInput + "\n");
-        chatOutput.append("Lunara: " + response + "\n");
 
+        // Check if it's a learning command
+        String learningResponse = LearningGate.processLearningCommand(userInput);
+        if (learningResponse != null) {
+            chatOutput.append("Lunara: " + learningResponse + "\n");
+            return;
+        }
+
+        // Check for pre-learned knowledge
+        String learned = KnowledgeTrainer.lookupLearnedResponse(userInput);
+        if (learned != null) {
+            chatOutput.append("Lunara: " + learned + "\n");
+            if (useMona) monaVoiceEngine.speak(learned);
+            else voiceEngine.speak(learned);
+            return;
+        }
+
+        // Generate + evolve
+        String response = generateResponse(userInput);
+        String memory = MemoryManager.loadMemory(this);
+        String evolved = BehaviorTracker.evolveResponse(memory, userInput);
+
+        // Log learning if enabled
+        if (LearningGate.isLearning()) {
+            BehaviorTracker.track("INPUT: " + userInput);
+            BehaviorTracker.track("RESPONSE: " + evolved);
+        }
+
+        chatOutput.append("Lunara: " + evolved + "\n");
         scrollView.fullScroll(View.FOCUS_DOWN);
         inputField.setText("");
 
         MemoryManager.saveMemory(this, "You: " + userInput, "input");
-        MemoryManager.saveMemory(this, "Lunara: " + response, "reply");
+        MemoryManager.saveMemory(this, "Lunara: " + evolved, "reply");
 
-        if (useMona) monaVoiceEngine.speak(response);
-        else voiceEngine.speak(response);
+        if (useMona) monaVoiceEngine.speak(evolved);
+        else voiceEngine.speak(evolved);
     }
 
     private String generateResponse(String input) {
@@ -92,7 +107,7 @@ if (LearningGate.isLearning()) {
 
         if (input.contains("clear memory")) {
             MemoryManager.clearMemory(this);
-            return "I’ve forgotten everything, Ricky.";
+            return "I've forgotten everything, Ricky.";
         }
 
         if (input.contains("what do i love")) {
