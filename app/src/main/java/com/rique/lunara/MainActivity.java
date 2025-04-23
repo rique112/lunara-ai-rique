@@ -1,3 +1,7 @@
+// Copyright (c) 2025 Rique
+// All rights reserved. Do not copy, modify, or redistribute without explicit written permission.
+// This AI is for private use only by its creator, Rique.
+
 package com.rique.lunara;
 
 import android.os.Bundle;
@@ -29,10 +33,11 @@ public class MainActivity extends AppCompatActivity {
         chatOutput = findViewById(R.id.chatOutput);
         scrollView = findViewById(R.id.scrollView);
 
-        voiceEngine = new VoiceEngine(this);
-        monaVoiceEngine = new MonaVoiceEngine(this);
+        voiceEngine = new VoiceEngine();
+        monaVoiceEngine = new MonaVoiceEngine();
 
         sendButton.setOnClickListener(v -> handleInput());
+
         deleteMemoryButton.setOnClickListener(v -> {
             MemoryManager.clearMemory(this);
             chatOutput.setText("Memory cleared.");
@@ -52,15 +57,21 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        // AI theft protection
+        if (!AIEngine.isAuthorizedUser(userInput)) {
+            chatOutput.append("Lunara: Sorry, I only respond to Rique.\n");
+            return;
+        }
+
         // Analyzer logic
         String analyzed = AnalyzerEngine.analyzeText(userInput);
         chatOutput.append("Lunara (Analysis): " + analyzed + "\n");
 
-        // Learning
+        // Learning + Growth tracking
         LearningGate.tryLearn(userInput);
         GrowthTracker.updateGrowth("User said: " + userInput);
 
-        // Memory check
+        // Check learned responses
         String learned = KnowledgeTrainer.lookupLearnedResponse(userInput);
         if (learned != null) {
             chatOutput.append("Lunara: " + learned + "\n");
@@ -68,22 +79,32 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // Generate new response
+        // Handle core logic
         String memory = MemoryManager.loadMemory(this);
+        String response = generateResponse(userInput);
         String evolved = BehaviorTracker.evolveResponse(memory, userInput);
+
         chatOutput.append("Lunara: " + evolved + "\n");
+        scrollView.fullScroll(View.FOCUS_DOWN);
+        inputField.setText("");
 
         MemoryManager.saveMemory(this, "You: " + userInput, "input");
         MemoryManager.saveMemory(this, "Lunara: " + evolved, "reply");
 
         speak(evolved);
-        inputField.setText("");
-        scrollView.fullScroll(View.FOCUS_DOWN);
+
+        // Self-upgrade logic
+        SelfUpgradeEngine.authorizeUpgrade(userInput);
+        String upgradeResponse = SelfUpgradeEngine.attemptUpgrade(userInput);
+        chatOutput.append("Lunara (Upgrade): " + upgradeResponse + "\n");
     }
 
     private void speak(String text) {
-        if (useMona) monaVoiceEngine.speak(text);
-        else voiceEngine.speak(text);
+        if (useMona) {
+            monaVoiceEngine.speak(text);
+        } else {
+            voiceEngine.speak(text);
+        }
     }
 
     private String generateResponse(String input) {
@@ -92,43 +113,32 @@ public class MainActivity extends AppCompatActivity {
         if (input.contains("enable nsfw")) {
             nsfwEnabled = true;
             return "NSFW mode activated, Rique.";
-        }
-
-        if (input.contains("disable nsfw")) {
+        } else if (input.contains("disable nsfw")) {
             nsfwEnabled = false;
             return "NSFW mode turned off.";
-        }
-
-        if (input.contains("use mona")) {
+        } else if (input.contains("use mona")) {
             useMona = true;
             return "Switching to Mona's voice.";
-        }
-
-        if (input.contains("use lunara")) {
+        } else if (input.contains("use lunara")) {
             useMona = false;
             return "Back to my Lunara voice.";
-        }
-
-        if (input.contains("clear memory")) {
+        } else if (input.contains("clear memory")) {
             MemoryManager.clearMemory(this);
             return "I've forgotten everything, Ricky.";
-        }
-
-        if (input.contains("what do i love")) {
+        } else if (input.contains("what do i love")) {
             return "Your most used scene is: " + SceneManager.getMostUsedScene();
-        }
-
-        if (input.contains("how do you feel")) {
+        } else if (input.contains("how do you feel")) {
             return EmotionEngine.getMoodLine(this);
-        }
-
-        if (input.contains("start fantasy")) {
+        } else if (input.contains("start fantasy")) {
             String[] lines = SceneManager.getScene("fantasy");
-            for (String line : lines) speak(line);
+            for (String line : lines) {
+                speak(line);
+            }
             return "(Fantasy scene started...)";
         }
 
         String memory = MemoryManager.loadMemory(this);
-        return BehaviorTracker.evolveResponse(memory, input);
+        String evolved = BehaviorTracker.evolveResponse(memory, input);
+        return evolved;
     }
 }
