@@ -127,5 +127,5 @@ private String generateResponse(String input) {
     if (input.contains("remember")) return memory.length() > 0 ? memory : "I haven’t logged anything yet.";
     if (input.contains("who are you")) return "I’m Lunara. Born from your thoughts. Yours to guide, yours to shape.";
 
-    return "Tell me more, Rique.";
+    return "Tell me more, Rique."; 
 }
