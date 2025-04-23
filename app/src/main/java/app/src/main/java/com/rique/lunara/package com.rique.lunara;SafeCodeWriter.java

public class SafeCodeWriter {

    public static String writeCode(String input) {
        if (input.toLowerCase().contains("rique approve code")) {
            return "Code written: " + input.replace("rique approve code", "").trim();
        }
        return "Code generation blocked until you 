@@ -1,0 +1,11 @@
+package com.rique.lunara;
+
+public class SafeCodeWriter {
+
+    public static String writeCode(String input) {
+        if (input.toLowerCase().contains("rique approve code")) {
+            return "Code written: " + input.replace("rique approve code", "").trim();
+        }
+        return "Code generation blocked until you say 'rique approve code'.";
+    }
+}
