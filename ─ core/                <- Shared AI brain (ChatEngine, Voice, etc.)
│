@@ -1,0 +1,46 @@
+​package com.rique.lunara.core;
+
+import java.util.HashMap;
+
+public class ChatEngine {
+
+private static final String SAFETY_KEY = "hidden_safety_key"; // Hidden safety key
+private static final String DEFAULT_RESPONSE = "I'm not sure about that yet, Ricky.";
+
+public String getResponse(String userInput) {
+    // Lowercase input for case-insensitive matching
+    userInput = userInput.toLowerCase();
+
+    // Safety checks
+    if (!isSafeCommand(userInput)) {
+        return "Ricky, I cannot process that command as it might not be safe.";
+    }
+
+    // Predefined responses
+    HashMap<String, String> predefinedResponses = new HashMap<>();
+    predefinedResponses.put("hello", "Hi there, Ricky! How can I assist you today?");
+    predefinedResponses.put("how are you", "I'm here to assist you. How are you?");
+    predefinedResponses.put("what's your name", "My name is Lunara, your AI companion.");
+
+    // Return a predefined response if it exists
+    if (predefinedResponses.containsKey(userInput)) {
+        return predefinedResponses.get(userInput);
+    }
+
+    // If no match is found, return the default response
+    return DEFAULT_RESPONSE;
+}
+
+private boolean isSafeCommand(String input) {
+    String[] unsafeCommands = {"delete safety key", "bypass safety", "erase safety"};
+    for (String command : unsafeCommands) {
+        if (input.contains(command)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+}
+
+
