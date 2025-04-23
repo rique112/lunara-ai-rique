@@ -1,13 +1,35 @@
-// Copyright (c) 2025 Rique
-// All rights reserved. Do not copy, modify, or redistribute without explicit written permission.
-// This AI is for private use only by its creator, Rique.
-
 package com.rique.lunara;
+
+/*
+ * Copyright © 2024–2025 Rique (Rique112)
+ * All rights reserved.
+ *
+ * This software and AI system “Lunara” is privately owned by Rique.
+ * It may not be used, copied, modified, distributed, or accessed without explicit permission.
+ * Lunara is designed as a personal evolving AI assistant with custom safety, memory, and autonomy.
+ * Unauthorized use is strictly prohibited and may result in legal action.
+ */
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ScrollView;
+import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.rique.lunara.AnalyzerEngine;
+import com.rique.lunara.AIEngine;
+import com.rique.lunara.BehaviorTracker;
+import com.rique.lunara.EmotionEngine;
+import com.rique.lunara.GrowthTracker;
+import com.rique.lunara.KnowledgeTrainer;
+import com.rique.lunara.LearningGate;
+import com.rique.lunara.MemoryManager;
+import com.rique.lunara.SceneManager;
+import com.rique.lunara.SelfUpgradeEngine;
+import com.rique.lunara.VoiceEngine;
+import com.rique.lunara.MonaVoiceEngine;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,9 +55,6 @@ public class MainActivity extends AppCompatActivity {
         chatOutput = findViewById(R.id.chatOutput);
         scrollView = findViewById(R.id.scrollView);
 
-        voiceEngine = new VoiceEngine();
-        monaVoiceEngine = new MonaVoiceEngine();
-
         sendButton.setOnClickListener(v -> handleInput());
 
         deleteMemoryButton.setOnClickListener(v -> {
@@ -57,21 +76,23 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // AI theft protection
-        if (!AIEngine.isAuthorizedUser(userInput)) {
-            chatOutput.append("Lunara: Sorry, I only respond to Rique.\n");
-            return;
-        }
+        // Upgrade gate
+        SelfUpgradeEngine.authorizeUpgrade(userInput);
+        String upgradeResponse = SelfUpgradeEngine.attemptUpgrade(userInput);
+        chatOutput.append("Lunara (Upgrade): " + upgradeResponse + "\n");
 
         // Analyzer logic
         String analyzed = AnalyzerEngine.analyzeText(userInput);
         chatOutput.append("Lunara (Analysis): " + analyzed + "\n");
 
-        // Learning + Growth tracking
-        LearningGate.tryLearn(userInput);
-        GrowthTracker.updateGrowth("User said: " + userInput);
+        // Check if it's a learning command
+        String learningResponse = LearningGate.processLearningCommand(userInput);
+        if (learningResponse != null) {
+            chatOutput.append("Lunara: " + learningResponse + "\n");
+            return;
+        }
 
-        // Check learned responses
+        // Check for pre-learned knowledge
         String learned = KnowledgeTrainer.lookupLearnedResponse(userInput);
         if (learned != null) {
             chatOutput.append("Lunara: " + learned + "\n");
@@ -79,10 +100,15 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // Handle core logic
-        String memory = MemoryManager.loadMemory(this);
+        // Generate + evolve response
         String response = generateResponse(userInput);
+        String memory = MemoryManager.loadMemory(this);
         String evolved = BehaviorTracker.evolveResponse(memory, userInput);
+
+        if (LearningGate.isLearning()) {
+            BehaviorTracker.track("INPUT: " + userInput);
+            BehaviorTracker.track("RESPONSE: " + evolved);
+        }
 
         chatOutput.append("Lunara: " + evolved + "\n");
         scrollView.fullScroll(View.FOCUS_DOWN);
@@ -92,19 +118,12 @@ public class MainActivity extends AppCompatActivity {
         MemoryManager.saveMemory(this, "Lunara: " + evolved, "reply");
 
         speak(evolved);
-
-        // Self-upgrade logic
-        SelfUpgradeEngine.authorizeUpgrade(userInput);
-        String upgradeResponse = SelfUpgradeEngine.attemptUpgrade(userInput);
-        chatOutput.append("Lunara (Upgrade): " + upgradeResponse + "\n");
+        GrowthTracker.updateGrowth("User said: " + userInput);
     }
 
-    private void speak(String text) {
-        if (useMona) {
-            monaVoiceEngine.speak(text);
-        } else {
-            voiceEngine.speak(text);
-        }
+    private void speak(String message) {
+        if (useMona) monaVoiceEngine.speak(message);
+        else voiceEngine.speak(message);
     }
 
     private String generateResponse(String input) {
@@ -113,23 +132,37 @@ public class MainActivity extends AppCompatActivity {
         if (input.contains("enable nsfw")) {
             nsfwEnabled = true;
             return "NSFW mode activated, Rique.";
-        } else if (input.contains("disable nsfw")) {
+        }
+
+        if (input.contains("disable nsfw")) {
             nsfwEnabled = false;
             return "NSFW mode turned off.";
-        } else if (input.contains("use mona")) {
+        }
+
+        if (input.contains("use mona")) {
             useMona = true;
             return "Switching to Mona's voice.";
-        } else if (input.contains("use lunara")) {
+        }
+
+        if (input.contains("use lunara")) {
             useMona = false;
             return "Back to my Lunara voice.";
-        } else if (input.contains("clear memory")) {
+        }
+
+        if (input.contains("clear memory")) {
             MemoryManager.clearMemory(this);
             return "I've forgotten everything, Ricky.";
-        } else if (input.contains("what do i love")) {
+        }
+
+        if (input.contains("what do i love")) {
             return "Your most used scene is: " + SceneManager.getMostUsedScene();
-        } else if (input.contains("how do you feel")) {
+        }
+
+        if (input.contains("how do you feel")) {
             return EmotionEngine.getMoodLine(this);
-        } else if (input.contains("start fantasy")) {
+        }
+
+        if (input.contains("start fantasy")) {
             String[] lines = SceneManager.getScene("fantasy");
             for (String line : lines) {
                 speak(line);
