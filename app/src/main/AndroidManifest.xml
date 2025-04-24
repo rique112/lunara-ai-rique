@@ -1,48 +1,55 @@
 <!--
-  Copyright (c) 2025 Rique (pronounced Ricky)
-  All rights reserved.
-  This file is part of the Lunara AI System.
-  Unauthorized use, copy, or modification is prohibited.
+    Copyright (c) 2025 Rique (pronounced Ricky)
+    All rights reserved.
+
+    This file is part of the Lunara AI system.
+    Redistribution, modification, or unauthorized use is strictly prohibited.
+    Designed to support full AI capabilities: voice, camera, memory, analysis, updates.
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.rique.lunara">
 
     <!-- Required permissions -->
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="28" />
-    <uses-permission android:name="android.permission.CAMERA" />
+        android:maxSdkVersion="28"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage"/>
 
-    <!-- App declaration -->
+    <!-- Let the system know it will use camera + mic features -->
+    <uses-feature android:name="android.hardware.camera.any" />
+    <uses-feature android:name="android.hardware.microphone" android:required="true" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="Lunara AI"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Lunara">
-
-        <!-- Main entry point -->
-        <activity android:name=".MainActivity"
-            android:exported="true"
-            android:configChanges="orientation|keyboardHidden|screenSize">
+        android:theme="@style/Theme.LunaraAI">
+        
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <!-- Future: Services (Voice background, Auto-updates) -->
+        <!-- Optional: Service placeholder for future upgrades or background AI -->
         <!--
-        <service android:name=".services.LunaraVoiceService"
-                 android:exported="false" />
+        <service
+            android:name=".LunaraService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="microphone|camera|dataSync"/>
         -->
 
     </application>
-
 </manifest>
