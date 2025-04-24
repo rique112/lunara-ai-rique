@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2025 Rique (pronounced Ricky)
  * All rights reserved.
- * This file is part of the Lunara AI System.
+ * No part of this code may be copied, modified, or used without permission.
  */
 
 package com.rique.lunara;
@@ -16,6 +16,7 @@ import android.widget.*;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
@@ -26,24 +27,21 @@ public class MainActivity extends AppCompatActivity {
 
     private EditText inputField;
     private TextView chatOutput;
-    private Button sendButton, voiceButton, camButton;
-
-    private VoiceEngine voice;
+    private Button sendButton, voiceButton, camButton, learnButton, clearMemoryBtn;
+    private VoiceEngine voiceEngine;
 
     private final ActivityResultLauncher<Intent> speechLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                    ArrayList<String> matches = result.getData()
-                            .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                    if (matches != null && !matches.isEmpty()) {
-                        String spokenText = matches.get(0);
-                        inputField.setText(spokenText);
-                        sendButton.performClick();
-                    }
+        new ActivityResultContracts.StartActivityForResult(),
+        result -> {
+            if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                ArrayList<String> matches = result.getData().getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                if (matches != null && !matches.isEmpty()) {
+                    String spokenText = matches.get(0);
+                    inputField.setText(spokenText);
+                    sendButton.performClick();
                 }
             }
-    );
+        });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,16 +53,12 @@ public class MainActivity extends AppCompatActivity {
         sendButton = findViewById(R.id.sendButton);
         voiceButton = findViewById(R.id.voiceButton);
         camButton = findViewById(R.id.camButton);
+        learnButton = findViewById(R.id.learnButton);
+        clearMemoryBtn = findViewById(R.id.clearMemoryBtn);
+
+        voiceEngine = new VoiceEngine(this);
 
         requestPermissions();
-
-        voice = new VoiceEngine(this);
-        // Optional: Add personalized boot voice
-        new android.os.Handler().postDelayed(() -> {
-            if (voice != null && voice.isReady()) {
-                voice.speak("Welcome back, Ricky. I'm ready to help.");
-            }
-        }, 2000);
 
         sendButton.setOnClickListener(v -> {
             String userInput = inputField.getText().toString();
@@ -75,26 +69,39 @@ public class MainActivity extends AppCompatActivity {
         });
 
         voiceButton.setOnClickListener(v -> startVoiceRecognition());
-        camButton.setOnClickListener(v -> CameraBrain.startCamera(MainActivity.this));
+        camButton.setOnClickListener(v -> CameraBrain.startCamera(this));
+        learnButton.setOnClickListener(v -> teachMemory());
+        clearMemoryBtn.setOnClickListener(v -> {
+            MemoryManager.clearMemory(this);
+            chatOutput.append("Lunara: Memory has been cleared.\n");
+        });
     }
 
     private void processUserInput(String input) {
         chatOutput.append("You: " + input + "\n");
 
-        String memoryAnswer = MemoryManager.loadMemory(this);
-        String onlineAnswer = OnlineBrain.search(input);
+        String memoryRecall = MemoryManager.loadMemory(this);
+        String onlineResponse = OnlineBrain.search(input);
 
-        String reply = onlineAnswer + "\n\n(Memory recall...)\n" + memoryAnswer;
-        chatOutput.append("Lunara: " + reply + "\n");
+        voiceEngine.speakWithEmotion("gentle", onlineResponse);
 
-        voice.speakWithEmotion("gentle", onlineAnswer); // Choose "gentle", "happy", "sad", etc.
-        MemoryManager.saveMemory(this, input + " → " + onlineAnswer, "Interaction");
+        chatOutput.append("Lunara: " + onlineResponse + "\n");
+        MemoryManager.saveMemory(this, input + " → " + onlineResponse, "Interaction");
+    }
+
+    private void teachMemory() {
+        String input = inputField.getText().toString();
+        if (!input.isEmpty()) {
+            MemoryManager.saveMemory(this, input, "Manual");
+            chatOutput.append("Lunara: Got it. I’ve stored that for later.\n");
+            voiceEngine.speak("Okay Ricky, I’ve remembered that.");
+            inputField.setText("");
+        }
     }
 
     private void startVoiceRecognition() {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
         intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak to Lunara");
         speechLauncher.launch(intent);
@@ -102,17 +109,17 @@ public class MainActivity extends AppCompatActivity {
 
     private void requestPermissions() {
         String[] permissions = {
-                Manifest.permission.RECORD_AUDIO,
-                Manifest.permission.CAMERA
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.CAMERA
         };
         ActivityCompat.requestPermissions(this, permissions, 1);
     }
 
     @Override
     protected void onDestroy() {
-        if (voice != null) {
-            voice.shutdown();
-        }
         super.onDestroy();
+        if (voiceEngine != null) {
+            voiceEngine.shutdown();
+        }
     }
 }
