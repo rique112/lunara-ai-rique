@@ -1,39 +1,48 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright (c) 2025 Rique (pronounced Ricky)
+  All rights reserved.
+  This file is part of the Lunara AI System.
+  Unauthorized use, copy, or modification is prohibited.
+-->
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.rique.lunara">
 
-    <!-- Permissions -->
-    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Required permissions -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
     <uses-permission android:name="android.permission.CAMERA" />
 
+    <!-- App declaration -->
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="Lunara AI"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.LunaraAI">
+        android:theme="@style/Theme.Lunara">
 
-        <!-- Main Entry Point -->
-        <activity android:name=".MainActivity">
+        <!-- Main entry point -->
+        <activity android:name=".MainActivity"
+            android:exported="true"
+            android:configChanges="orientation|keyboardHidden|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <!-- Optional Future Activities -->
-        <activity android:name=".UpgradeActivity" android:exported="false" />
-        <activity android:name=".ImageViewerActivity" android:exported="false" />
-        <activity android:name=".VoiceSettingsActivity" android:exported="false" />
+        <!-- Future: Services (Voice background, Auto-updates) -->
+        <!--
+        <service android:name=".services.LunaraVoiceService"
+                 android:exported="false" />
+        -->
 
-        <!-- AI Services -->
-        <service android:name=".LunaraService" android:exported="false" />
-        <service android:name=".SpeechService" android:exported="false" />
     </application>
+
 </manifest>
