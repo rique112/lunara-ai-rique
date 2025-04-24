@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2025 Rique (pronounced Ricky)
+ * All rights reserved.
+ *
+ * This file is part of the Lunara AI system.
+ * No part of this code may be copied, modified, distributed, or used
+ * without explicit permission from the creator.
+ */
+
 package com.rique.lunara;
 
 import android.content.Context;
