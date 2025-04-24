@@ -17,26 +17,23 @@
         android:label="Lunara AI"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
+        android:theme="@style/Theme.LunaraAI">
 
-        <!-- Launcher Activity -->
-        <activity
-            android:name=".MainActivity"
-            android:exported="true">
+        <!-- Main Entry Point -->
+        <activity android:name=".MainActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <!-- Future Activities (optional for upgrade UI or image viewer) -->
+        <!-- Optional Future Activities -->
         <activity android:name=".UpgradeActivity" android:exported="false" />
         <activity android:name=".ImageViewerActivity" android:exported="false" />
         <activity android:name=".VoiceSettingsActivity" android:exported="false" />
 
         <!-- AI Services -->
-        <service android:name=".LunaraService" android:exported="false"/>
-        <service android:name=".SpeechService" android:exported="false"/>
+        <service android:name=".LunaraService" android:exported="false" />
+        <service android:name=".SpeechService" android:exported="false" />
     </application>
-
 </manifest>
