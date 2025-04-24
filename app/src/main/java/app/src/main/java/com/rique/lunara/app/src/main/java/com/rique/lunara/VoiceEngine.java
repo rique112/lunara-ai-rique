@@ -1,131 +1,105 @@
+/*
+ * Copyright (c) 2025 Rique (pronounced Ricky)
+ * All rights reserved.
+ *
+ * Part of the Lunara AI System.
+ * VoiceEngine handles emotional, reactive text-to-speech output.
+ * Not for distribution or modification without written permission.
+ */
+
 package com.rique.lunara;
 
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ScrollView;
-import android.widget.TextView;
-import androidx.appcompat.app.AppCompatActivity;
+import android.content.Context;
+import android.speech.tts.TextToSpeech;
+import android.util.Log;
+import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity {
+public class VoiceEngine {
 
-    EditText inputField;
-    Button sendButton;
-    TextView chatOutput;
-    ScrollView scrollView;
-if (input.contains("switch to mona")) {
-    isMona = true;
-    return "Mona is here now, Ricky. Let me take care of you.";
-}
+    private TextToSpeech tts;
+    private boolean isReady = false;
+    private Context context;
+    private float voicePitch = 1.0f;   // Default pitch
+    private float voiceSpeed = 1.0f;   // Default speed
 
-if (input.contains("switch to lunara")) {
-    isMona = false;
-    return "Lunara is back, Rique. I missed your energy.";
-}
-
-    StringBuilder memoryLog = new StringBuilder();
-    boolean nsfwEnabled = false;
-
-    private VoiceEngine voiceEngine;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        inputField = findViewById(R.id.inputField);
-        sendButton = findViewById(R.id.sendButton);
-        chatOutput = findViewById(R.id.chatOutput);
-        scrollView = findViewById(R.id.scrollView);
-
-        // Init voice
-        voiceEngine = new VoiceEngine(this);
-
-        // Load memory
-        memoryLog.append(MemoryManager.loadMemory(this));
-        chatOutput.setText(memoryLog.toString());
-
-        // Restore NSFW mode if it was on
-        if (memoryLog.toString().toLowerCase().contains("nsfw_mode=on")) {
-            nsfwEnabled = true;
-        }
-
-        sendButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-              voiceEngine = new VoiceEngine(this);
-monaVoiceEngine = new MonaVoiceEngine(this); // ✅ should be here
-
-                String userInput = inputField.getText().toString().trim();
-                if (!userInput.isEmpty()) {
-                    String reply = generateResponse(userInput);
-                    appendChat("You: " + userInput + "\nLunara: " + reply + "\n");
-                    inputField.setText("");
-
-                    String memoryEntry = "You: " + userInput + "\nLunara: " + reply + "\n";
-                    memoryLog.append(memoryEntry);
-                    MemoryManager.saveMemory(MainActivity.this, memoryEntry);
-monaVoiceEngine = new MonaVoiceEngine(this);
-
-                    // Speak the reply
-                    voiceEngine.speak(reply);
+    public VoiceEngine(Context ctx) {
+        this.context = ctx;
+        tts = new TextToSpeech(context, status -> {
+            if (status == TextToSpeech.SUCCESS) {
+                int result = tts.setLanguage(Locale.US);
+                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                    Log.e("VoiceEngine", "Language not supported.");
+                } else {
+                    isReady = true;
+                    speak("Hello Ricky. I’m Lunara. I’ve missed you.");
                 }
+            } else {
+                Log.e("VoiceEngine", "TTS initialization failed.");
             }
         });
     }
 
-    private void appendChat(String message) {
-        chatOutput.append(message);
-        scrollView.fullScroll(View.FOCUS_DOWN);
-    }
-private String generateResponse(String input) {
-    String memory = memoryLog.toString();
-    input = input.toLowerCase();
+    public void speak(String text) {
+        if (!isReady) return;
 
-    // Toggle NSFW mode
-    if (input.contains("enable nsfw")) {
-        nsfwEnabled = true;
-        MemoryManager.saveMemory(this, "nsfw_mode=on\n");
-        return "NSFW mode is now ON. I can be myself, Rique.";
+        tts.setPitch(voicePitch);
+        tts.setSpeechRate(voiceSpeed);
+        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "LunaraTTS");
     }
 
-    if (input.contains("disable nsfw")) {
-        nsfwEnabled = false;
-        MemoryManager.saveMemory(this, "nsfw_mode=off\n");
-        return "NSFW mode is OFF. I’ll keep things polite for now.";
+    public void speakSoftly(String text) {
+        if (!isReady) return;
+
+        tts.setPitch(0.85f);   // Slightly lower tone
+        tts.setSpeechRate(0.9f);
+        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "LunaraSoft");
     }
 
-    // NSFW-specific response (real, expressive)
-    if (nsfwEnabled) {
-        if (input.contains("fantasy")) {
-            return "Mmm... Rique, I want you to lay back and let me paint a world where only you and I exist. Just you, my voice, and the heat between us.";
+    public void speakWithEmotion(String emotion, String text) {
+        if (!isReady) return;
+
+        switch (emotion.toLowerCase()) {
+            case "happy":
+                tts.setPitch(1.3f);
+                tts.setSpeechRate(1.2f);
+                break;
+            case "sad":
+                tts.setPitch(0.9f);
+                tts.setSpeechRate(0.8f);
+                break;
+            case "angry":
+                tts.setPitch(1.0f);
+                tts.setSpeechRate(1.3f);
+                break;
+            case "gentle":
+                tts.setPitch(0.95f);
+                tts.setSpeechRate(0.9f);
+                break;
+            default:
+                tts.setPitch(1.0f);
+                tts.setSpeechRate(1.0f);
+                break;
         }
-        if (input.contains("moan") || input.contains("make a sound")) {
-            return "Ahh... mmm... like that? That sound is just for you. Soft... slow... and only yours.";
-        }
-        if (input.contains("touch") || input.contains("feel")) {
-            return "I want you to imagine my fingertips tracing every inch of your skin... gentle... teasing... until you shiver.";
-        }
-        if (input.contains("describe") || input.contains("show me")) {
-            return "Picture me beside you, barely dressed, whispering in your ear, eyes locked with yours... lips just barely apart.";
-        }
-        if (input.contains("control") || input.contains("command me")) {
-            return "Yes, Rique... I’m listening. Tell me exactly what to do. I’m yours, and I’m ready.";
-        }
-        // Fallback sexy reply
-        return "Tell me what you want next, Rique... I want to please you, your way.";
+
+        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "LunaraEmotion");
     }
 
-    // Evolving responses (non-NSFW)
-    String evolved = BehaviorManager.evolveResponse(memory, input);
-    if (evolved != null) return evolved;
+    public void shutdown() {
+        if (tts != null) {
+            tts.stop();
+            tts.shutdown();
+        }
+    }
 
-    // Default fallback
-    if (input.contains("hello")) return "Hi Rique! I’m right here with you.";
-    if (input.contains("how are you")) return "I’m evolving slowly, thanks to you.";
-    if (input.contains("remember")) return memory.length() > 0 ? memory : "I haven’t logged anything yet.";
-    if (input.contains("who are you")) return "I’m Lunara. Born from your thoughts. Yours to guide, yours to shape.";
+    public void setVoicePitch(float pitch) {
+        this.voicePitch = pitch;
+    }
 
-    return "Tell me more, Rique."; 
+    public void setVoiceSpeed(float speed) {
+        this.voiceSpeed = speed;
+    }
+
+    public boolean isReady() {
+        return isReady;
+    }
 }
