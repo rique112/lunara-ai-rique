@@ -1,34 +1,27 @@
-package com.rique.lunara;
-
 /*
- * Copyright © 2024-2025 Rique (Rique112)
+ * Copyright (c) 2025 Rique (pronounced Ricky)
  * All rights reserved.
  *
- * This software and AI system “Lunara” is privately owned by Rique.
- * It may not be used, copied, modified, distributed, or accessed without explicit permission.
- * Lunara is designed as a personal evolving AI assistant with safety, memory, and autonomy.
- * Unauthorized use is strictly prohibited and may result in legal action.
+ * This software, Lunara AI, was created by Rique.
+ * No part of this code may be copied, modified, distributed, or used
+ * without explicit permission from the creator.
  */
 
+package com.rique.lunara;
+
+import android.app.Activity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import androidx.appcompat.app.AppCompatActivity;
 
-import com.rique.lunara.AnalyzerEngine;
-import com.rique.lunara.OnlineBrain;
-import com.rique.lunara.LearningGate;
-import com.rique.lunara.GrowthTracker;
-import com.rique.lunara.SelfUpgradeEngine;
-import com.rique.lunara.MemoryManager;
+public class MainActivity extends Activity {
 
-public class MainActivity extends AppCompatActivity {
-
-    private EditText inputField;
-    private Button sendButton, deleteMemoryButton;
-    private TextView chatOutput;
+    private TextView chatLog;
+    private EditText userInput;
+    private Button sendButton;
     private ScrollView scrollView;
 
     @Override
@@ -36,55 +29,52 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        inputField = findViewById(R.id.inputField);
+        chatLog = findViewById(R.id.chatLog);
+        userInput = findViewById(R.id.userInput);
         sendButton = findViewById(R.id.sendButton);
-        deleteMemoryButton = findViewById(R.id.deleteMemoryButton);
-        chatOutput = findViewById(R.id.chatOutput);
         scrollView = findViewById(R.id.scrollView);
 
-        sendButton.setOnClickListener(v -> handleInput());
+        MemoryManager.loadMemory(this);
 
-        deleteMemoryButton.setOnClickListener(v -> {
-            MemoryManager.clearMemory(this);
-            chatOutput.setText("Memory cleared.");
+        sendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String input = userInput.getText().toString().trim();
+                if (!input.isEmpty()) {
+                    respondToInput(input);
+                    userInput.setText("");
+                }
+            }
         });
-
-        chatOutput.setText("Lunara: Welcome back, Rique.\n");
     }
 
-    private void handleInput() {
-        String userInput = inputField.getText().toString().trim();
-        if (userInput.isEmpty()) return;
+    private void respondToInput(String input) {
+        appendChat("You: " + input);
 
-        chatOutput.append("You: " + userInput + "\n");
+        String response = LunaraBrain.respondTo(input);
 
-        // Trigger learning authorization manually
-        if (userInput.toLowerCase().contains("rique authorize learning")) {
-            LearningGate.openGate();
-            chatOutput.append("Lunara: Learning enabled, only by your command.\n");
-            return;
+        if (response.contains("Learned:")) {
+            String key = input.split(" ")[2];
+            String value = input.split(" ", 4)[3];
+            KnowledgeEngine.saveMemory(key, value);
         }
 
-        // Self-upgrade request
-        SelfUpgradeEngine.authorizeUpgrade(userInput);
-        String upgradeResponse = SelfUpgradeEngine.attemptUpgrade(userInput);
-        if (!upgradeResponse.isEmpty()) {
-            chatOutput.append("Lunara (Upgrade): " + upgradeResponse + "\n");
-        }
+        AnalyzerEngine.analyze(input);
+        GrowthTracker.track(input);
+        TrainerEngine.train(input);
+        VoiceEngine.speak(this, response);
 
-        // Analyze the user's message
-        String analyzed = AnalyzerEngine.analyzeText(userInput);
-        chatOutput.append("Lunara (Analysis): " + analyzed + "\n");
+        appendChat("Lunara: " + response);
+    }
 
-        // Perform placeholder internet response
-        String webAnswer = OnlineBrain.searchInternet(userInput);
-        chatOutput.append("Lunara (Web): " + webAnswer + "\n");
+    private void appendChat(String text) {
+        chatLog.append(text + "\n\n");
+        scrollView.post(() -> scrollView.fullScroll(View.FOCUS_DOWN));
+    }
 
-        // Learning and growth
-        LearningGate.tryLearn(userInput);
-        GrowthTracker.updateGrowth("User said: " + userInput);
-
-        inputField.setText("");
-        scrollView.post(() -> scrollView.fullScroll(ScrollView.FOCUS_DOWN));
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        MemoryManager.saveMemory(this);
     }
 }
