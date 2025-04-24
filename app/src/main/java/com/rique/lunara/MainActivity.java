@@ -1,22 +1,22 @@
 /*
  * Copyright (c) 2025 Rique (pronounced Ricky)
  * All rights reserved.
- * This file is part of the Lunara AI System.
- * Unauthorized use, copy, or modification is prohibited.
+ * No part of this code may be copied, modified, or used without permission.
  */
 
 package com.rique.lunara;
 
 import android.Manifest;
-import android.app.Activity;
-import android.os.Bundle;
-import android.speech.tts.TextToSpeech;
-import android.speech.RecognizerIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.widget.*;
+import android.os.Bundle;
+import android.speech.RecognizerIntent;
+import android.speech.tts.TextToSpeech;
 import android.view.View;
+import android.widget.*;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -28,10 +28,23 @@ public class MainActivity extends AppCompatActivity {
 
     private EditText inputField;
     private TextView chatOutput;
-    private Button sendButton, voiceButton;
+    private Button sendButton, voiceButton, camButton;
     private TextToSpeech tts;
-    private static final int REQUEST_CODE_SPEECH_INPUT = 100;
-    private static final int REQUEST_MIC_PERMISSION = 1;
+
+    private final ActivityResultLauncher<Intent> speechLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    ArrayList<String> matches = result.getData()
+                            .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                    if (matches != null && !matches.isEmpty()) {
+                        String spokenText = matches.get(0);
+                        inputField.setText(spokenText);
+                        sendButton.performClick();
+                    }
+                }
+            }
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,88 +55,57 @@ public class MainActivity extends AppCompatActivity {
         chatOutput = findViewById(R.id.chatOutput);
         sendButton = findViewById(R.id.sendButton);
         voiceButton = findViewById(R.id.voiceButton);
+        camButton = findViewById(R.id.camButton);
 
-        // Request microphone permission
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_MIC_PERMISSION);
-        }
+        requestPermissions();
 
-        // Text-to-Speech setup
-        tts = new TextToSpeech(getApplicationContext(), status -> {
+        tts = new TextToSpeech(this, status -> {
             if (status == TextToSpeech.SUCCESS) {
                 tts.setLanguage(Locale.US);
+                tts.setSpeechRate(1.0f);
             }
         });
 
-        // Send typed input
         sendButton.setOnClickListener(v -> {
-            String userInput = inputField.getText().toString().trim();
+            String userInput = inputField.getText().toString();
             if (!userInput.isEmpty()) {
-                chatOutput.append("You: " + userInput + "\n");
-                handleInput(userInput);
+                processUserInput(userInput);
                 inputField.setText("");
             }
         });
 
-        // Voice input
-        voiceButton.setOnClickListener(v -> startVoiceInput());
+        voiceButton.setOnClickListener(v -> startVoiceRecognition());
+        camButton.setOnClickListener(v -> CameraBrain.startCamera(MainActivity.this));
     }
 
-    private void handleInput(String input) {
-        String response;
+    private void processUserInput(String input) {
+        chatOutput.append("You: " + input + "\n");
 
-        if (input.toLowerCase().startsWith("rique says learn this:")) {
-            String info = input.substring("rique says learn this:".length()).trim();
-            MemoryManager.saveMemory(this, info, "learned");
-            response = "Got it, Rique. I’ve learned: " + info;
-        } else if (input.equalsIgnoreCase("rique says forget everything")) {
-            MemoryManager.clearMemory(this);
-            response = "All memory cleared as requested.";
-        } else if (input.toLowerCase().startsWith("rique says search:")) {
-            String query = input.substring("rique says search:".length()).trim();
-            response = OnlineBrain.search(query);
-        } else if (input.equalsIgnoreCase("rique says update")) {
-            response = SelfUpgradeEngine.update(this);
-        } else if (input.equalsIgnoreCase("rique says evolve")) {
-            response = GrowthTracker.evolve();
-        } else if (input.toLowerCase().startsWith("rique says analyze this:")) {
-            String data = input.substring("rique says analyze this:".length()).trim();
-            response = AnalyzerEngine.analyze(data);
-        } else if (input.equalsIgnoreCase("rique says show memory")) {
-            response = MemoryManager.loadMemory(this);
-        } else {
-            response = MemoryManager.getResponse(this, input);
-        }
+        String memoryAnswer = MemoryManager.loadMemory(this);
+        String onlineAnswer = OnlineBrain.search(input);
+        String reply = onlineAnswer + "\n\n(Recalling memory...)\n" + memoryAnswer;
 
-        chatOutput.append("Lunara: " + response + "\n");
-        tts.speak(response, TextToSpeech.QUEUE_FLUSH, null, null);
+        chatOutput.append("Lunara: " + reply + "\n");
+        tts.speak(onlineAnswer, TextToSpeech.QUEUE_FLUSH, null, null);
+
+        MemoryManager.saveMemory(this, input + " → " + onlineAnswer, "Interaction");
     }
 
-    private void startVoiceInput() {
+    private void startVoiceRecognition() {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak to Lunara...");
-
-        try {
-            startActivityForResult(intent, REQUEST_CODE_SPEECH_INPUT);
-        } catch (Exception e) {
-            Toast.makeText(this, "Voice input not supported", Toast.LENGTH_SHORT).show();
-        }
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak to Lunara");
+        speechLauncher.launch(intent);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == REQUEST_CODE_SPEECH_INPUT && resultCode == RESULT_OK && data != null) {
-            ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-            if (result != null && !result.isEmpty()) {
-                String spokenText = result.get(0);
-                inputField.setText(spokenText);
-                sendButton.performClick();
-            }
-        }
+    private void requestPermissions() {
+        String[] permissions = {
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.CAMERA
+        };
+        ActivityCompat.requestPermissions(this, permissions, 1);
     }
 
     @Override
