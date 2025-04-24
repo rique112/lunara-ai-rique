@@ -67,4 +67,24 @@ public class MainActivity extends AppCompatActivity {
 
         // Self-upgrade request
         SelfUpgradeEngine.authorizeUpgrade(userInput);
-        String upgrade
+        String upgradeResponse = SelfUpgradeEngine.attemptUpgrade(userInput);
+        if (!upgradeResponse.isEmpty()) {
+            chatOutput.append("Lunara (Upgrade): " + upgradeResponse + "\n");
+        }
+
+        // Analyze the user's message
+        String analyzed = AnalyzerEngine.analyzeText(userInput);
+        chatOutput.append("Lunara (Analysis): " + analyzed + "\n");
+
+        // Perform placeholder internet response
+        String webAnswer = OnlineBrain.searchInternet(userInput);
+        chatOutput.append("Lunara (Web): " + webAnswer + "\n");
+
+        // Learning and growth
+        LearningGate.tryLearn(userInput);
+        GrowthTracker.updateGrowth("User said: " + userInput);
+
+        inputField.setText("");
+        scrollView.post(() -> scrollView.fullScroll(ScrollView.FOCUS_DOWN));
+    }
+}
