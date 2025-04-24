@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2025 Rique (pronounced Ricky)
  * All rights reserved.
- * No part of this code may be copied, modified, or used without permission.
+ * This file is part of the Lunara AI System.
  */
 
 package com.rique.lunara;
@@ -11,13 +11,11 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
-import android.speech.tts.TextToSpeech;
 import android.view.View;
 import android.widget.*;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
@@ -29,7 +27,8 @@ public class MainActivity extends AppCompatActivity {
     private EditText inputField;
     private TextView chatOutput;
     private Button sendButton, voiceButton, camButton;
-    private TextToSpeech tts;
+
+    private VoiceEngine voice;
 
     private final ActivityResultLauncher<Intent> speechLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -59,12 +58,13 @@ public class MainActivity extends AppCompatActivity {
 
         requestPermissions();
 
-        tts = new TextToSpeech(this, status -> {
-            if (status == TextToSpeech.SUCCESS) {
-                tts.setLanguage(Locale.US);
-                tts.setSpeechRate(1.0f);
+        voice = new VoiceEngine(this);
+        // Optional: Add personalized boot voice
+        new android.os.Handler().postDelayed(() -> {
+            if (voice != null && voice.isReady()) {
+                voice.speak("Welcome back, Ricky. I'm ready to help.");
             }
-        });
+        }, 2000);
 
         sendButton.setOnClickListener(v -> {
             String userInput = inputField.getText().toString();
@@ -83,11 +83,11 @@ public class MainActivity extends AppCompatActivity {
 
         String memoryAnswer = MemoryManager.loadMemory(this);
         String onlineAnswer = OnlineBrain.search(input);
-        String reply = onlineAnswer + "\n\n(Recalling memory...)\n" + memoryAnswer;
 
+        String reply = onlineAnswer + "\n\n(Memory recall...)\n" + memoryAnswer;
         chatOutput.append("Lunara: " + reply + "\n");
-        tts.speak(onlineAnswer, TextToSpeech.QUEUE_FLUSH, null, null);
 
+        voice.speakWithEmotion("gentle", onlineAnswer); // Choose "gentle", "happy", "sad", etc.
         MemoryManager.saveMemory(this, input + " → " + onlineAnswer, "Interaction");
     }
 
@@ -110,9 +110,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        if (tts != null) {
-            tts.stop();
-            tts.shutdown();
+        if (voice != null) {
+            voice.shutdown();
         }
         super.onDestroy();
     }
