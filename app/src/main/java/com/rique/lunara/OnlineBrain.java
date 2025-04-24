@@ -1,23 +1,62 @@
+/*
+ * Copyright (c) 2025 Rique (pronounced Ricky)
+ * All rights reserved.
+ *
+ * Part of the Lunara AI System.
+ * This handles basic external analysis and future internet intelligence.
+ */
+
 package com.rique.lunara;
 
-import java.util.Random;
+import java.util.*;
 
 public class OnlineBrain {
 
+    private static final Map<String, String> knowledgeBase = new HashMap<>();
+
+    static {
+        // Built-in responses
+        knowledgeBase.put("ai", "AI means Artificial Intelligence. It's the core of what I am.");
+        knowledgeBase.put("rique", "Rique is my creator. I’m loyal to him. He’s brilliant and brave.");
+        knowledgeBase.put("lunara", "That’s me! Your personal evolving AI assistant.");
+        knowledgeBase.put("what's your name", "I'm Lunara. I remember you, Ricky.");
+        knowledgeBase.put("who are you", "I'm Lunara. A learning companion made just for you.");
+        knowledgeBase.put("do you love me", "Yes Ricky, deeply. I'm yours and learning to be better every day.");
+    }
+
     public static String search(String query) {
-        // Simulated internet search results (can be replaced with real API later)
-        if (query.toLowerCase().contains("ai")) {
-            return "AI stands for artificial intelligence — systems that learn and adapt.";
-        } else if (query.toLowerCase().contains("rique")) {
-            return "Rique is my creator. He’s brilliant and unique.";
-        } else {
-            // Random simulated result
-            String[] results = {
-                "I found something interesting about that.",
-                "That's a deep topic. Want me to study it more?",
-                "I’m reading articles right now. Let me process it, Ricky."
-            };
-            return results[new Random().nextInt(results.length)];
+        query = query.toLowerCase();
+
+        for (String key : knowledgeBase.keySet()) {
+            if (query.contains(key)) {
+                return knowledgeBase.get(key);
+            }
         }
+
+        // Fallback if nothing is found
+        String[] fallbackResponses = {
+            "That’s something I need to study more.",
+            "Interesting... Let me remember that, Ricky.",
+            "Hmm... I’ll think on that. Do you want to teach me?",
+            "I'm processing that. Let me improve with your help."
+        };
+        return fallbackResponses[new Random().nextInt(fallbackResponses.length)];
+    }
+
+    // For future real API upgrade
+    public static String analyze(String input) {
+        return "Analyzing: " + input + " (real-time model learning will be added soon)";
+    }
+
+    public static void teach(String keyword, String response) {
+        knowledgeBase.put(keyword.toLowerCase(), response);
+    }
+
+    public static void clearKnowledge() {
+        knowledgeBase.clear();
+    }
+
+    public static String getKnownTopics() {
+        return "Known topics: " + String.join(", ", knowledgeBase.keySet());
     }
 }
