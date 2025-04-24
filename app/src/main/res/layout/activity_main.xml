@@ -1,49 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2025 Rique (pronounced Ricky)
+    All rights reserved.
+
+    This layout is part of the Lunara AI system.
+    Unauthorized use, duplication, or modification is strictly prohibited.
+-->
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/mainLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="#101010">
 
+    <!-- Chat Output Window -->
     <ScrollView
         android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="#eeeeee">
+        android:background="#1e1e1e"
+        android:padding="8dp">
 
         <TextView
             android:id="@+id/chatOutput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="#000000"
-            android:textSize="16sp" />
+            android:textColor="#ffffff"
+            android:textSize="16sp"
+            android:text="Lunara: Hello, Rique. I’m here for you."
+            android:lineSpacingExtra="4dp" />
     </ScrollView>
 
-    <EditText
-        android:id="@+id/inputField"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Ask Lunara..."
-        android:inputType="text" />
-
+    <!-- Input Field + Send/Voice Buttons -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp">
+
+        <EditText
+            android:id="@+id/inputField"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:hint="Ask Lunara..."
+            android:background="#333"
+            android:textColor="#ffffff"
+            android:padding="10dp"
+            android:textSize="16sp" />
 
         <Button
             android:id="@+id/sendButton"
-            android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="Send"
-            android:layout_height="wrap_content" />
+            android:background="#4CAF50"
+            android:textColor="#ffffff"
+            android:layout_marginLeft="4dp" />
+    </LinearLayout>
+
+    <!-- Voice + Camera Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="6dp"
+        android:gravity="end">
 
         <Button
             android:id="@+id/voiceButton"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:text="Speak"
-            android:layout_height="wrap_content" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Voice"
+            android:background="#2196F3"
+            android:textColor="#ffffff"
+            android:layout_marginRight="8dp" />
+
+        <Button
+            android:id="@+id/camButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Vision"
+            android:background="#9C27B0"
+            android:textColor="#ffffff" />
     </LinearLayout>
 </LinearLayout>
