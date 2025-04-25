@@ -1,109 +1,134 @@
 /*
  * Copyright (c) 2025 Rique (pronounced Ricky)
  * All rights reserved.
- *
- * This file is part of the Lunara AI system.
- * No part of this code may be copied, modified, distributed, or used
- * without explicit permission from the creator.
+ * Lunara AI Memory Management System
+ * No part of this code may be copied, modified, or redistributed without explicit permission.
  */
 
 package com.rique.lunara;
 
 import android.content.Context;
-import java.io.*;
+import android.util.Log;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 public class MemoryManager {
 
-    private static final String FILE_NAME = "lunara_memory.txt";
-    private static final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+    private static final String MEMORY_DIR = "lunara_memory";
+    private static final String MEMORY_FILE = "core_memory.txt";
 
-    // Save a memory entry with timestamp and optional label
-    public static void saveMemory(Context context, String message, String label) {
+    // Save memory entry (with type: Interaction, Learning, Emotion, etc.)
+    public static void saveMemory(Context context, String data, String type) {
         try {
-            FileOutputStream fos = context.openFileOutput(FILE_NAME, Context.MODE_APPEND);
-            String timestamp = TIMESTAMP_FORMAT.format(new Date());
-            String entry = "[" + label + "] " + timestamp + " | " + message;
-            fos.write((entry + "\n").getBytes());
-            fos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            File dir = new File(context.getFilesDir(), MEMORY_DIR);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+
+            File file = new File(dir, MEMORY_FILE);
+            BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
+
+            String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
+            String entry = "[" + type.toUpperCase() + "] " + timestamp + " -> " + data;
+
+            writer.append(entry);
+            writer.newLine();
+            writer.flush();
+            writer.close();
+
+        } catch (Exception e) {
+            Log.e("MemoryManager", "Error saving memory: " + e.getMessage());
         }
     }
 
-    // Load all memory entries
+    // Load the last 10 memory entries for Lunara's context
     public static String loadMemory(Context context) {
-        StringBuilder memory = new StringBuilder();
         try {
-            FileInputStream fis = context.openFileInput(FILE_NAME);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+            File dir = new File(context.getFilesDir(), MEMORY_DIR);
+            File file = new File(dir, MEMORY_FILE);
+
+            if (!file.exists()) {
+                return "I don't remember anything yet.";
+            }
+
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            ArrayList<String> entries = new ArrayList<>();
             String line;
+
             while ((line = reader.readLine()) != null) {
-                memory.append(line).append("\n");
+                entries.add(line);
             }
             reader.close();
-            fis.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return memory.toString();
-    }
 
-    // Search memory for keyword
-    public static List<String> searchMemory(Context context, String keyword) {
-        List<String> matches = new ArrayList<>();
-        try {
-            FileInputStream fis = context.openFileInput(FILE_NAME);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.toLowerCase().contains(keyword.toLowerCase())) {
-                    matches.add(line);
-                }
+            StringBuilder lastEntries = new StringBuilder();
+            int start = Math.max(0, entries.size() - 10);
+            for (int i = start; i < entries.size(); i++) {
+                lastEntries.append(entries.get(i)).append("\n");
             }
-            reader.close();
-            fis.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            return lastEntries.toString().trim();
+
+        } catch (Exception e) {
+            Log.e("MemoryManager", "Error loading memory: " + e.getMessage());
+            return "My memory is cloudy right now.";
         }
-        return matches;
     }
 
-    // Clear all memory on command
+    // Clear all stored memory
     public static void clearMemory(Context context) {
         try {
-            FileOutputStream fos = context.openFileOutput(FILE_NAME, Context.MODE_PRIVATE);
-            fos.write("".getBytes());
-            fos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            File dir = new File(context.getFilesDir(), MEMORY_DIR);
+            File file = new File(dir, MEMORY_FILE);
+
+            if (file.exists()) {
+                file.delete();
+            }
+        } catch (Exception e) {
+            Log.e("MemoryManager", "Error clearing memory: " + e.getMessage());
         }
     }
 
-    // Optional: Keep memory under control (e.g., trim after 500 entries)
-    public static void checkMemoryLimit(Context context, int maxLines) {
+    // Advanced future option: categorized memory retrieval
+    public static String searchMemory(Context context, String typeFilter) {
         try {
-            FileInputStream fis = context.openFileInput(FILE_NAME);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
-            List<String> lines = new ArrayList<>();
+            File dir = new File(context.getFilesDir(), MEMORY_DIR);
+            File file = new File(dir, MEMORY_FILE);
+
+            if (!file.exists()) {
+                return "I have no memories of that type.";
+            }
+
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            ArrayList<String> filteredEntries = new ArrayList<>();
             String line;
+
             while ((line = reader.readLine()) != null) {
-                lines.add(line);
+                if (line.startsWith("[" + typeFilter.toUpperCase() + "]")) {
+                    filteredEntries.add(line);
+                }
             }
             reader.close();
-            fis.close();
 
-            if (lines.size() > maxLines) {
-                List<String> recent = lines.subList(lines.size() - maxLines, lines.size());
-                FileOutputStream fos = context.openFileOutput(FILE_NAME, Context.MODE_PRIVATE);
-                for (String l : recent) {
-                    fos.write((l + "\n").getBytes());
-                }
-                fos.close();
+            if (filteredEntries.isEmpty()) {
+                return "No memories found for: " + typeFilter;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+
+            StringBuilder memories = new StringBuilder();
+            for (String entry : filteredEntries) {
+                memories.append(entry).append("\n");
+            }
+            return memories.toString().trim();
+
+        } catch (Exception e) {
+            Log.e("MemoryManager", "Error searching memory: " + e.getMessage());
+            return "Error accessing specific memories.";
         }
     }
 }
