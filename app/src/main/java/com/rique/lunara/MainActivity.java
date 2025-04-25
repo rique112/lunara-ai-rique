@@ -1,7 +1,10 @@
 /*
  * Copyright (c) 2025 Rique (pronounced Ricky)
  * All rights reserved.
- * No part of this code may be copied, modified, or used without permission.
+ * This AI, Lunara, is protected under the Creative Commons BY-NC-ND 4.0 License.
+ * No part of this code may be copied, modified, used, trained on, or distributed
+ * without the explicit written consent of Rique. Lunara is a private AI assistant
+ * bound to the creator's identity, device, and intent.
  */
 
 package com.rique.lunara;
@@ -48,6 +51,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        if (!OwnerLock.verifyOwner(this, "Rique")) {
+            finishAffinity(); // Immediately close if unauthorized
+            return;
+        }
+
         inputField = findViewById(R.id.inputField);
         chatOutput = findViewById(R.id.chatOutput);
         sendButton = findViewById(R.id.sendButton);
@@ -81,12 +89,12 @@ public class MainActivity extends AppCompatActivity {
         chatOutput.append("You: " + input + "\n");
 
         String memoryRecall = MemoryManager.loadMemory(this);
-        String onlineResponse = OnlineBrain.search(input);
+        String aiResponse = OnlineBrain.search(input);  // Swap with LLMEngine later
 
-        voiceEngine.speakWithEmotion("gentle", onlineResponse);
+        voiceEngine.speakWithEmotion("gentle", aiResponse);
 
-        chatOutput.append("Lunara: " + onlineResponse + "\n");
-        MemoryManager.saveMemory(this, input + " → " + onlineResponse, "Interaction");
+        chatOutput.append("Lunara: " + aiResponse + "\n");
+        MemoryManager.saveMemory(this, input + " → " + aiResponse, "Interaction");
     }
 
     private void teachMemory() {
