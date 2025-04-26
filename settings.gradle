@@ -1,0 +1,22 @@
+// Copyright (c) 2025 Rique (rique112)
+// Trademark Lunara AI ™
+// All rights reserved. Unauthorized duplication prohibited.
+
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "LunaraAI"
+include ':app'
