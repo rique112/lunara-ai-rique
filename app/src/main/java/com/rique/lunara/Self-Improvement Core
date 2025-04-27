@@ -1,0 +1,64 @@
+package com.rique.lunara;
+
+import java.io.File;
+import java.util.List;
+import java.util.ArrayList;
+
+public class SelfImprovementCore {
+
+    private AnalyzerEngine analyzer;
+    private List<String> upgradeSuggestions;
+
+    public SelfImprovementCore() {
+        this.analyzer = new AnalyzerEngine();  // Call the AnalyzerEngine to analyze each output
+        this.upgradeSuggestions = new ArrayList<>();
+    }
+
+    // Method to automatically analyze images/videos/songs/voices and suggest improvements
+    public void analyzeAndImprove(File outputFile, String type, String promptStyle) {
+        // Step 1: Analyze the output (image/video/song/voice)
+        analyzer.analyzeImage(outputFile, promptStyle);  // For images (you can expand this for other types)
+        
+        // Step 2: Collect the upgrade suggestions
+        List<String> suggestions = analyzer.getUpgradeSuggestions();
+        
+        // Step 3: Automatically improve based on suggestions (for now, just log them)
+        if (!suggestions.isEmpty()) {
+            for (String suggestion : suggestions) {
+                System.out.println("Improvement suggestion: " + suggestion);
+                upgradeSuggestions.add(suggestion);
+            }
+        }
+        
+        // Step 4: Automatically apply improvements (for now, this part is pending and should be manually reviewed)
+        applyImprovements();
+    }
+
+    // Method to apply improvements automatically (future-proofing for Lunara's self-upgrade)
+    private void applyImprovements() {
+        for (String suggestion : upgradeSuggestions) {
+            // Placeholder: Implement logic to apply the upgrade automatically
+            // For example: tweak image generator parameters, change sound generation settings, etc.
+            System.out.println("Applying suggestion: " + suggestion);
+        }
+        
+        // Step 5: Clear suggestions after they have been "applied"
+        clearSuggestions();
+    }
+
+    // Method to clear upgrade suggestions after they've been applied
+    private void clearSuggestions() {
+        upgradeSuggestions.clear();
+    }
+
+    // Get upgrade suggestions (in case you want to manually review them)
+    public List<String> getUpgradeSuggestions() {
+        return upgradeSuggestions;
+    }
+
+    // Future function: (You can later implement a mechanism to automatically apply upgrades based on what Lunara learns)
+    public void enableSelfLearning() {
+        // This function would allow Lunara to automatically learn from each creation and adjust her settings
+        System.out.println("Lunara is now set to learn and evolve automatically based on her creations.");
+    }
+}
