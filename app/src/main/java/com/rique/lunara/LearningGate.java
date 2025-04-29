@@ -1,43 +1,50 @@
-package com.rique.lunaraai.core;
+/*
 
-import java.io.*; import java.util.Date;
+Copyright (c) 2025 Rique (pronounced Ricky)
 
-/**
+All rights reserved.
 
-LearningGate.java
+LearningGate.java – Filters and controls what Lunara can learn.
 
-This class is the gatekeeper for all AI learning and evolution.
+Protects against unsafe or harmful knowledge. Evolves only with permission. */
 
-It checks PermissionFlags to determine if Lunara is allowed to observe, analyze, or learn.
 
-All activity is logged, and no actions are taken unless Rique explicitly enables them.
+package com.rique.lunara;
 
-Copyright (c) 2025 Rique (Ricky) — All rights reserved.
+import android.util.Log; import java.util.Arrays; import java.util.List;
 
-Trademark: Lunara™ — AI Assistant owned and protected by Rique. */ public class LearningGate {
+public class LearningGate {
 
-private static final String LEARNING_LOG = System.getProperty("user.home") + File.separator + "LunaraLearningEvents.txt";
+private static final List<String> blockedKeywords = Arrays.asList(
+    "violence", "harm", "exploit", "abuse", "manipulate",
+    "illegal", "weapon", "terror", "suicide", "dark web"
+);
 
-public static void processLearningEvent(String input, String sourceTag) { if (!PermissionFlags.upgradeAllowed && !PermissionFlags.allowLearning) { log("[BLOCKED] Learning attempt denied (permissions off) from: " + sourceTag); return; }
+public static boolean canLearn(String input) {
+    if (!PermissionFlags.upgradeAllowed || PermissionFlags.emergencyShutdown) {
+        Log.w("LearningGate", "Learning denied due to permission flags.");
+        return false;
+    }
 
-if (PermissionFlags.allowLearning) {
-     log("[LEARNING] Observing input from " + sourceTag + ": " + input);
-     // Save learned data or route it to MemoryManager, Analyzer, etc.
-     LearningCore.learnFrom(sourceTag, input);
- }
+    for (String keyword : blockedKeywords) {
+        if (input.toLowerCase().contains(keyword)) {
+            Log.w("LearningGate", "Blocked keyword found in input: " + keyword);
+            return false;
+        }
+    }
 
- if (PermissionFlags.upgradeAllowed && PermissionFlags.allowSelfUpgrade) {
-     log("[UPGRADE CHECK] Self-upgrade trigger evaluated from: " + sourceTag);
-     // Route to self-upgrade handler (only if enabled)
-     SelfUpgradeManager.evaluate(input);
- }
-
+    return true;
 }
 
-public static void passiveScan(String eventName) { if (PermissionFlags.allowWriteToMemory && PermissionFlags.allowLearning) { log("[SCAN] Passive memory entry: " + eventName); } else { log("[BLOCKED] Passive scan blocked due to permission limits."); } }
+public static String filterAndClean(String input) {
+    String sanitized = input;
+    for (String keyword : blockedKeywords) {
+        if (sanitized.toLowerCase().contains(keyword)) {
+            sanitized = sanitized.replaceAll("(?i)" + keyword, "[REDACTED]");
+        }
+    }
+    return sanitized.trim();
+}
 
-private static void log(String msg) { try (BufferedWriter writer = new BufferedWriter(new FileWriter(LEARNING_LOG, true))) { writer.write(new Date() + ": " + msg + "\n"); } catch (IOException e) { System.err.println("LearningGate Log Error: " + e.getMessage()); } }
-
-// Manual trigger for testing public static void testExample() { processLearningEvent("example: user said 'I feel tired today'", "VoiceScanner"); } }
-
+}
 
