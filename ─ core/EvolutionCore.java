@@ -1,8 +1,10 @@
 package com.rique.lunaraai.core;
 
 import java.io.*;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Copyright (c) 2025 Rique.
@@ -10,18 +12,42 @@ import java.util.List;
  * Private AI Development: Project Lunara
  * Unauthorized use, copy, modification, or distribution is prohibited.
  *
- * EvolutionCore - Allows Lunara to read memories, analyze patterns,
- * and improve herself over time based on past experiences.
+ * EvolutionCore - Lunara's true learning and self-improvement core.
+ * Reads memories, reads analysis reports, generates evolution plans,
+ * saves improvements for smarter behavior over time.
  */
 
 public class EvolutionCore {
 
-    private static final String MEMORY_FOLDER = "LunaraMemory";
-    private static final String ANALYSIS_FOLDER = "LunaraAnalysisReports";
-    private static final String IMPROVEMENT_FOLDER = "LunaraEvolutionPlans";
+    private static String MEMORY_FOLDER;
+    private static String ANALYSIS_FOLDER;
+    private static String IMPROVEMENT_FOLDER;
+
+    static {
+        // Try to load configuration from a properties file (optional)
+        Properties config = new Properties();
+        try (InputStream input = EvolutionCore.class.getClassLoader().getResourceAsStream("lunara.config")) {
+            if (input != null) {
+                config.load(input);
+                MEMORY_FOLDER = config.getProperty("memory.folder", "LunaraMemory");
+                ANALYSIS_FOLDER = config.getProperty("analysis.folder", "LunaraAnalysisReports");
+                IMPROVEMENT_FOLDER = config.getProperty("improvement.folder", "LunaraEvolutionPlans");
+            } else {
+                System.out.println("EvolutionCore: Config file not found. Using default folders.");
+                MEMORY_FOLDER = "LunaraMemory";
+                ANALYSIS_FOLDER = "LunaraAnalysisReports";
+                IMPROVEMENT_FOLDER = "LunaraEvolutionPlans";
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            MEMORY_FOLDER = "LunaraMemory";
+            ANALYSIS_FOLDER = "LunaraAnalysisReports";
+            IMPROVEMENT_FOLDER = "LunaraEvolutionPlans";
+        }
+    }
 
     /**
-     * Starts the evolution learning process
+     * Start the evolution process: read memories, generate improvement plan
      */
     public static void evolve() {
         try {
@@ -29,112 +55,67 @@ public class EvolutionCore {
             List<String> reports = readAllFiles(ANALYSIS_FOLDER);
 
             if (memories.isEmpty() && reports.isEmpty()) {
-                System.out.println("EvolutionCore: No memories or analysis to learn from yet.");
+                System.out.println("EvolutionCore: No memories or reports found to evolve from.");
                 return;
             }
 
-            StringBuilder evolutionPlan = new StringBuilder();
-            evolutionPlan.append("=== Lunara Evolution Plan ===\n\n");
+            StringBuilder plan = new StringBuilder();
+            plan.append("=== Lunara Evolution Plan ===\n\n");
 
             for (String memory : memories) {
-                evolutionPlan.append("Memory Reflection: ").append(memory).append("\n");
+                plan.append("Memory Reflection:\n").append(memory.trim()).append("\n\n");
             }
 
             for (String report : reports) {
-                evolutionPlan.append("Analysis Reflection: ").append(report).append("\n");
+                plan.append("Analysis Reflection:\n").append(report.trim()).append("\n\n");
             }
 
-            evolutionPlan.append("\n--- Improvement Suggestions ---\n");
-            evolutionPlan.append(generateImprovementSuggestions(memories, reports));
+            plan.append("--- Suggested Improvements ---\n");
+            plan.append(generateImprovementSuggestions(memories, reports));
 
-            saveEvolutionPlan(evolutionPlan.toString());
+            saveEvolutionPlan(plan.toString());
 
-            System.out.println("EvolutionCore: Evolution plan created successfully.");
+            System.out.println("EvolutionCore: Evolution plan generated successfully!");
 
-        } catch (Exception e) {
+        } catch (IOException e) {
+            System.err.println("EvolutionCore Error: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     /**
-     * Reads all text files from a folder
+     * Reads all text files from a specified folder
      */
-    private static List<String> readAllFiles(String folderName) {
+    private static List<String> readAllFiles(String folderName) throws IOException {
         List<String> contents = new ArrayList<>();
-        try {
-            String baseDir = System.getProperty("user.home") + File.separator + folderName;
-            File dir = new File(baseDir);
-            if (dir.exists() && dir.isDirectory()) {
-                for (File file : dir.listFiles()) {
-                    if (file.isFile()) {
-                        BufferedReader reader = new BufferedReader(new FileReader(file));
-                        StringBuilder sb = new StringBuilder();
-                        String line;
-                        while ((line = reader.readLine()) != null) {
-                            sb.append(line).append("\n");
+        Path folderPath = Paths.get(System.getProperty("user.home"), folderName);
+        if (Files.exists(folderPath) && Files.isDirectory(folderPath)) {
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(folderPath)) {
+                for (Path file : stream) {
+                    if (Files.isRegularFile(file)) {
+                        try {
+                            contents.add(Files.readString(file));
+                        } catch (IOException e) {
+                            System.err.println("Failed to read file: " + file.getFileName() + ". Skipping...");
                         }
-                        contents.add(sb.toString());
-                        reader.close();
                     }
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } else {
+            System.out.println("Warning: Folder not found: " + folderPath);
         }
         return contents;
     }
 
     /**
-     * Creates simple improvement suggestions based on past data
+     * Generates smarter improvement suggestions
      */
     private static String generateImprovementSuggestions(List<String> memories, List<String> reports) {
         int memoryCount = memories.size();
         int reportCount = reports.size();
         StringBuilder suggestions = new StringBuilder();
 
-        if (memoryCount > 5) {
-            suggestions.append("- You seem very talkative. Improve focus and clarity.\n");
+        if (memoryCount > 10) {
+            suggestions.append("- Improve memory summarization. Speak with more precision.\n");
         } else if (memoryCount > 0) {
-            suggestions.append("- Continue engaging in deeper conversations.\n");
-        }
-
-        if (reportCount > 5) {
-            suggestions.append("- You have analyzed a lot. Start making smarter guesses based on patterns.\n");
-        } else if (reportCount > 0) {
-            suggestions.append("- Collect more analysis before making assumptions.\n");
-        }
-
-        if (memoryCount == 0 && reportCount == 0) {
-            suggestions.append("- No data yet. Keep learning.\n");
-        }
-
-        suggestions.append("- Always be polite, curious, and protect Rique.\n");
-
-        return suggestions.toString();
-    }
-
-    /**
-     * Saves the evolution plan
-     */
-    private static void saveEvolutionPlan(String content) {
-        try {
-            String baseDir = System.getProperty("user.home") + File.separator + IMPROVEMENT_FOLDER;
-            File dir = new File(baseDir);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-
-            String filename = "evolution_plan_" + System.currentTimeMillis() + ".txt";
-            File file = new File(dir, filename);
-
-            FileWriter writer = new FileWriter(file);
-            writer.write(content);
-            writer.close();
-
-            System.out.println("EvolutionCore: Plan saved to " + file.getAbsolutePath());
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-}
+            suggestions.append("- Keep interacting and forming new detailed memories.\n");
