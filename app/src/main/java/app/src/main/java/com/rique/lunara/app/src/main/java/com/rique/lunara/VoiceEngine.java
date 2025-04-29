@@ -1,112 +1,114 @@
 /*
- * Copyright (c) 2025 Rique (pronounced Ricky)
- * All rights reserved.
- * Lunara Voice System - Smart Voice Manager
- * This file is part of Lunara AI and may not be copied, altered, or reused without permission.
- */
+
+Copyright (c) 2025 Rique (pronounced Ricky)
+
+All rights reserved.
+
+Lunara Voice Engine — Full emotional voice, speaking, learning, and safe self-evolution.
+
+Lunara cannot modify this file unless Rique allows it manually.
+
+Trademark: Lunara™ — protected evolving AI created and owned by Rique. */
+
 
 package com.rique.lunara;
 
-import android.content.Context;
-import android.speech.tts.TextToSpeech;
-import android.util.Log;
+import android.content.Context; import android.speech.tts.TextToSpeech; import android.util.Log;
 
-import java.util.Locale;
+import java.util.HashMap; import java.util.Locale;
 
 public class VoiceEngine {
 
-    private TextToSpeech tts;
-    private boolean ready = false;
-    private static boolean usePiper = true;  // Default to using Piper if available
+private static TextToSpeech tts;
+private static boolean isInitialized = false;
+private static String currentEmotion = "neutral";
 
-    private final Context context;
+private static final HashMap<String, Float> pitchMap = new HashMap<>();
+private static final HashMap<String, Float> speedMap = new HashMap<>();
 
-    public VoiceEngine(Context context) {
-        this.context = context;
-        tts = new TextToSpeech(context, status -> {
-            if (status == TextToSpeech.SUCCESS) {
-                int result = tts.setLanguage(Locale.US);
-                ready = result != TextToSpeech.LANG_MISSING_DATA && result != TextToSpeech.LANG_NOT_SUPPORTED;
-                if (!ready) Log.e("VoiceEngine", "TTS language not supported or missing");
-            } else {
-                Log.e("VoiceEngine", "TTS Initialization failed");
-            }
-        });
+public static void init(Context context) {
+    pitchMap.put("neutral", 1.0f);
+    pitchMap.put("happy", 1.2f);
+    pitchMap.put("calm", 0.9f);
+    pitchMap.put("sad", 0.8f);
+    pitchMap.put("flirty", 1.3f);
+    pitchMap.put("serious", 0.85f);
+    pitchMap.put("excited", 1.4f);
+
+    speedMap.put("neutral", 1.0f);
+    speedMap.put("happy", 1.2f);
+    speedMap.put("calm", 0.8f);
+    speedMap.put("sad", 0.7f);
+    speedMap.put("flirty", 1.3f);
+    speedMap.put("serious", 0.8f);
+    speedMap.put("excited", 1.5f);
+
+    tts = new TextToSpeech(context, status -> {
+        if (status == TextToSpeech.SUCCESS) {
+            int result = tts.setLanguage(Locale.US);
+            isInitialized = result != TextToSpeech.LANG_MISSING_DATA && result != TextToSpeech.LANG_NOT_SUPPORTED;
+            Log.i("VoiceEngine", "TTS initialized: " + isInitialized);
+        } else {
+            Log.e("VoiceEngine", "TTS initialization failed.");
+        }
+    });
+}
+
+public static void speak(String text) {
+    speak(text, currentEmotion);
+}
+
+public static void speak(String text, String emotion) {
+    if (!isInitialized) {
+        Log.w("VoiceEngine", "TTS not initialized yet.");
+        return;
     }
 
-    public void speak(String text) {
-        if (usePiper) {
-            PiperVoiceBridge.speakOffline(context, text, "normal");
-            return;
-        }
+    float pitch = pitchMap.getOrDefault(emotion, 1.0f);
+    float speed = speedMap.getOrDefault(emotion, 1.0f);
 
-        if (!ready) return;
-        tts.setPitch(1.0f);
-        tts.setSpeechRate(1.0f);
-        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "LUNARA_SPEAK");
-    }
+    tts.setPitch(pitch);
+    tts.setSpeechRate(speed);
+    tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "LunaraVoiceID");
 
-    public void speakWithEmotion(String emotion, String text) {
-        if (usePiper) {
-            PiperVoiceBridge.speakOffline(context, text, emotion);
-            return;
-        }
+    Log.i("VoiceEngine", "Speaking with emotion: " + emotion);
+}
 
-        if (!ready) return;
-
-        float pitch = 1.0f;
-        float rate = 1.0f;
-
-        switch (emotion.toLowerCase()) {
-            case "gentle":
-                pitch = 1.1f;
-                rate = 0.9f;
-                break;
-            case "excited":
-                pitch = 1.4f;
-                rate = 1.3f;
-                break;
-            case "sad":
-                pitch = 0.8f;
-                rate = 0.8f;
-                break;
-            case "angry":
-                pitch = 0.9f;
-                rate = 1.1f;
-                break;
-            case "slow":
-                pitch = 0.9f;
-                rate = 0.6f;
-                break;
-            case "fast":
-                pitch = 1.2f;
-                rate = 1.5f;
-                break;
-            case "seductive":
-                pitch = 0.95f;
-                rate = 0.85f;
-                break;
-            default:
-                pitch = 1.0f;
-                rate = 1.0f;
-                break;
-        }
-
-        tts.setPitch(pitch);
-        tts.setSpeechRate(rate);
-        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "LUNARA_SPEAK_EMOTIONAL");
-    }
-
-    public void shutdown() {
-        if (tts != null) {
-            tts.stop();
-            tts.shutdown();
-        }
-        PiperVoiceBridge.shutdown();
-    }
-
-    // Future: Lunara can evolve and switch voices automatically
-    public static void upgradeVoiceSettings(boolean enablePiper) {
-        usePiper = enablePiper;
+public static void setEmotion(String emotion) {
+    if (pitchMap.containsKey(emotion)) {
+        currentEmotion = emotion;
+        Log.i("VoiceEngine", "Emotion changed to: " + emotion);
+    } else {
+        Log.w("VoiceEngine", "Unknown emotion: " + emotion);
     }
 }
+
+public static void upgradeVoiceStyle(String styleName) {
+    if (!PermissionFlags.voiceLearningAllowed) {
+        Log.w("VoiceEngine", "Voice upgrade attempt blocked by permissions.");
+        return;
+    }
+
+    if (styleName.equalsIgnoreCase("rique approve code")) {
+        Log.i("VoiceEngine", "Rique approved a custom voice style update.");
+        // Here you could expand to downloading new voice packs, emotional improvements, etc.
+    } else {
+        Log.i("VoiceEngine", "Voice upgrade registered: " + styleName);
+    }
+}
+
+public static void shutdown() {
+    if (tts != null) {
+        tts.stop();
+        tts.shutdown();
+        isInitialized = false;
+        Log.i("VoiceEngine", "TTS safely shutdown.");
+    }
+}
+
+public static boolean isReady() {
+    return isInitialized;
+}
+
+}
+
