@@ -4,73 +4,74 @@ Copyright (c) 2025 Rique (pronounced Ricky)
 
 All rights reserved.
 
-Lunara AI Evolution Core
+Lunara SelfUpgradeManager.java
 
-Lunara can self-evolve only when explicitly allowed.
+This system allows Lunara to generate, propose, and log new code only when explicitly allowed.
 
-Core protection logic CANNOT be changed by Lunara, ever. */
+All generated code is saved into a secure location and must be reviewed and approved manually.
+
+Core safety flags and protection cannot be overridden by Lunara. */
 
 
 package com.rique.lunara;
 
-import android.content.Context; import android.util.Log; import java.io.*; import java.text.SimpleDateFormat; import java.util.Date; import java.util.Locale;
+import android.content.Context; import android.util.Log;
 
-public class EvolutionEngine {
+import java.io.File; import java.io.FileWriter; import java.text.SimpleDateFormat; import java.util.Date; import java.util.Locale;
 
-private static final String UPGRADE_LOG = "evolution_log.txt";
+public class SelfUpgradeManager {
 
-public static void attemptUpgrade(Context context, String command) {
-    if (!PermissionFlags.upgradeAllowed) {
-        Log.w("EvolutionEngine", "Upgrade blocked by permission flag.");
+private static final String SELF_UPGRADE_FOLDER = "LunaraSelfUpgrades";
+private static final String UPGRADE_LOG = "self_upgrade_log.txt";
+
+public static void proposeNewCode(Context context, String idea, String fileName) {
+    if (!PermissionFlags.upgradeAllowed || PermissionFlags.emergencyShutdown) {
+        Log.w("SelfUpgradeManager", "Self-upgrade blocked by permissions or emergency shutdown.");
         return;
     }
 
-    if (PermissionFlags.emergencyShutdown) {
-        Log.w("EvolutionEngine", "Upgrade denied: emergency shutdown active.");
-        return;
-    }
+    try {
+        File upgradeDir = new File(context.getFilesDir(), SELF_UPGRADE_FOLDER);
+        if (!upgradeDir.exists()) upgradeDir.mkdirs();
 
-    if (command == null || command.length() < 5) return;
+        File newCodeFile = new File(upgradeDir, fileName);
+        FileWriter writer = new FileWriter(newCodeFile);
+        writer.write("// Proposed by Lunara AI - Needs Review\n");
+        writer.write("/* Automatically generated idea */\n");
+        writer.write(idea);
+        writer.flush();
+        writer.close();
 
-    // Simulated logic branching, with hooks for actual upgrades
-    if (command.toLowerCase().contains("evolve voice")) {
-        VoiceEngine.upgradeVoiceStyle("new-style-" + System.currentTimeMillis());
-        logUpgrade(context, "Voice style updated.");
-    } else if (command.toLowerCase().contains("enhance image")) {
-        ImageGenerator.improveModel("detail-enhancer-v2");
-        logUpgrade(context, "Image model enhanced.");
-    } else if (command.toLowerCase().contains("process videos better")) {
-        // Placeholder future feature
-        logUpgrade(context, "Video processing pipeline improved.");
-    } else if (command.toLowerCase().contains("learn from web") && PermissionFlags.internetAllowed) {
-        InternetAnalyzer.learnFromOnlineContext(context, "latest-news");
-        logUpgrade(context, "Web learning triggered.");
-    } else {
-        logUpgrade(context, "Custom manual upgrade executed: " + command);
+        logSelfUpgrade(context, "New code proposal saved: " + fileName);
+    } catch (Exception e) {
+        Log.e("SelfUpgradeManager", "Error during code generation: " + e.getMessage());
     }
 }
 
-private static void logUpgrade(Context context, String message) {
+private static void logSelfUpgrade(Context context, String message) {
     try {
         File logFile = new File(context.getFilesDir(), UPGRADE_LOG);
         FileWriter writer = new FileWriter(logFile, true);
         String time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
-        writer.append("[EVOLUTION] ").append(time).append(" → ").append(message).append("\n");
+        writer.append("[SELF-UPGRADE] ").append(time).append(" → ").append(message).append("\n");
         writer.flush();
         writer.close();
     } catch (Exception e) {
-        Log.e("EvolutionEngine", "Failed to log evolution: " + e.getMessage());
+        Log.e("SelfUpgradeManager", "Failed to log upgrade: " + e.getMessage());
     }
 }
 
-// PROTECTION: Lunara can NEVER touch this or bypass it
-public static boolean canAccessProtectedCore() {
-    return false;  // Hardwired: AI cannot view/modify core safety code
+public static boolean isUpgradeEnabled() {
+    return PermissionFlags.upgradeAllowed && !PermissionFlags.emergencyShutdown;
 }
 
-// PROTECTED call: blocks AI from modifying safety logic
-public static void triggerCoreIntegrityCheck(Context context) {
-    Log.i("EvolutionEngine", "Core protection verified — unchanged.");
+public static void triggerManualReviewNotice(Context context, String moduleName) {
+    Log.i("SelfUpgradeManager", "Review required for generated module: " + moduleName);
+}
+
+// PROTECTION: Cannot be bypassed by Lunara
+public static boolean canLunaraModifySelfUpgradeCore() {
+    return false;  // Never allowed at runtime
 }
 
 }
