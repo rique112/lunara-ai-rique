@@ -1,74 +1,92 @@
-<?xml version="1.0" encoding="utf-8"?><ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-android:padding="16dp">
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2025 Rique (pronounced Ricky)
+    All rights reserved.
+    Layout: Lunara™ Command Center UI
+    This layout is protected under Creative Commons BY-NC-ND 4.0.
+    No use, modification, or redistribution allowed without written consent of Rique.
+-->
 
-<LinearLayout
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:gravity="center_horizontal">
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="@android:color/background_dark">
 
-    <EditText
-        android:id="@+id/inputField"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Type here (memory, essay, code, etc.)"
-        android:padding="12dp"
-        android:background="@android:drawable/edit_text"
-        android:textSize="16sp" />
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
 
-    <Button
-        android:id="@+id/btnSaveMemory"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Save New Memory"
-        android:layout_marginTop="16dp"/>
+        <EditText
+            android:id="@+id/inputField"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Type here (memory, essay, code, etc.)"
+            android:padding="12dp"
+            android:background="@android:drawable/edit_text"
+            android:textSize="16sp"
+            android:textColor="@android:color/white" />
 
-    <Button
-        android:id="@+id/btnAnalyzeEssay"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Analyze Essay"
-        android:layout_marginTop="8dp"/>
+        <Button
+            android:id="@+id/btnSaveMemory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save New Memory"
+            android:layout_marginTop="16dp" />
 
-    <Button
-        android:id="@+id/btnLearn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Learn New Thing"
-        android:layout_marginTop="8dp"/>
+        <Button
+            android:id="@+id/btnAnalyzeEssay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Analyze Essay"
+            android:layout_marginTop="8dp" />
 
-    <Button
-        android:id="@+id/btnUpgrade"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Upgrade AI (if allowed)"
-        android:layout_marginTop="8dp"/>
+        <Button
+            android:id="@+id/btnLearn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Learn New Thing"
+            android:layout_marginTop="8dp" />
 
-    <Button
-        android:id="@+id/btnGrowth"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Show Growth Summary"
-        android:layout_marginTop="8dp"/>
+        <Button
+            android:id="@+id/btnUpgrade"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Upgrade AI (if allowed)"
+            android:layout_marginTop="8dp" />
 
-    <Button
-        android:id="@+id/btnForget"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Forget All Memories"
-        android:layout_marginTop="8dp"
-        android:textColor="@android:color/holo_red_dark"/>
+        <Button
+            android:id="@+id/btnGrowth"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Show Growth Summary"
+            android:layout_marginTop="8dp" />
 
-    <Button
-        android:id="@+id/btnShutdown"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Emergency Shutdown"
-        android:layout_marginTop="8dp"
-        android:textColor="@android:color/holo_red_dark"/>
+        <Button
+            android:id="@+id/btnForget"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Forget All Memories"
+            android:layout_marginTop="8dp"
+            android:textColor="@android:color/holo_red_dark" />
 
-</LinearLayout>
+        <Button
+            android:id="@+id/btnShutdown"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Emergency Shutdown"
+            android:layout_marginTop="8dp"
+            android:textColor="@android:color/holo_red_dark" />
 
+        <Button
+            android:id="@+id/btnToggleTheme"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Toggle Light/Dark Theme"
+            android:layout_marginTop="12dp"
+            android:textColor="@android:color/holo_blue_light" />
+
+    </LinearLayout>
 </ScrollView>
