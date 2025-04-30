@@ -1,134 +1,146 @@
-/*
+<?xml version="1.0" encoding="utf-8"?><RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:padding="16dp"
+tools:context=".MainActivity">
 
-Copyright (c) 2025 Rique (pronounced Ricky)
+<!-- Chat Output -->
+<TextView
+    android:id="@+id/chatOutput"
+    android:layout_width="match_parent"
+    android:layout_height="250dp"
+    android:layout_alignParentTop="true"
+    android:background="#111111"
+    android:textColor="#FFFFFF"
+    android:textSize="16sp"
+    android:padding="10dp"
+    android:scrollbars="vertical"
+    android:text="Lunara is waiting..." />
 
-All rights reserved.
+<!-- Input Field -->
+<EditText
+    android:id="@+id/inputField"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/chatOutput"
+    android:hint="Say something..."
+    android:background="#222222"
+    android:textColor="#FFFFFF"
+    android:textColorHint="#888888"
+    android:padding="10dp"
+    android:textSize="16sp" />
 
-This AI, Lunara, is protected under the Creative Commons BY-NC-ND 4.0 License.
+<!-- Send Button -->
+<Button
+    android:id="@+id/sendButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/inputField"
+    android:layout_alignParentStart="true"
+    android:text="Send" />
 
-No part of this code may be copied, modified, used, trained on, or distributed
+<!-- Voice Button -->
+<Button
+    android:id="@+id/voiceButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/inputField"
+    android:layout_toEndOf="@id/sendButton"
+    android:layout_marginStart="8dp"
+    android:text="Voice" />
 
-without the explicit written consent of Rique. Lunara is a private AI assistant
+<!-- Camera Button -->
+<Button
+    android:id="@+id/camButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/inputField"
+    android:layout_toEndOf="@id/voiceButton"
+    android:layout_marginStart="8dp"
+    android:text="Camera" />
 
-bound to the creator's identity, device, and intent. */
+<!-- Learn Button -->
+<Button
+    android:id="@+id/learnButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/inputField"
+    android:layout_toEndOf="@id/camButton"
+    android:layout_marginStart="8dp"
+    android:text="Learn" />
 
+<!-- Clear Memory Button -->
+<Button
+    android:id="@+id/clearMemoryBtn"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/inputField"
+    android:layout_toEndOf="@id/learnButton"
+    android:layout_marginStart="8dp"
+    android:text="Clear" />
 
-package com.rique.lunara;
+<!-- Upgrade Button -->
+<Button
+    android:id="@+id/upgradeButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/sendButton"
+    android:layout_alignParentStart="true"
+    android:layout_marginTop="8dp"
+    android:text="Upgrade" />
 
-import android.Manifest; import android.content.Intent; import android.content.pm.PackageManager; import android.os.Bundle; import android.speech.RecognizerIntent; import android.view.View; import android.widget.*;
+<!-- Observe Button -->
+<Button
+    android:id="@+id/observeButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/sendButton"
+    android:layout_toEndOf="@id/upgradeButton"
+    android:layout_marginStart="8dp"
+    android:layout_marginTop="8dp"
+    android:text="Observe" />
 
-import androidx.activity.result.ActivityResultLauncher; import androidx.activity.result.contract.ActivityResultContracts; import androidx.annotation.Nullable; import androidx.appcompat.app.AppCompatActivity; import androidx.core.app.ActivityCompat;
+<!-- NSFW Toggle Button -->
+<Button
+    android:id="@+id/nsfwToggleButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/observeButton"
+    android:layout_alignParentStart="true"
+    android:layout_marginTop="8dp"
+    android:text="NSFW Toggle" />
 
-import java.util.ArrayList; import java.util.Locale;
+<!-- Internet Toggle Button -->
+<Button
+    android:id="@+id/internetToggleButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/observeButton"
+    android:layout_toEndOf="@id/nsfwToggleButton"
+    android:layout_marginStart="8dp"
+    android:layout_marginTop="8dp"
+    android:text="Internet" />
 
-public class MainActivity extends AppCompatActivity {
+<!-- Reset AI Chat -->
+<Button
+    android:id="@+id/resetButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/internetToggleButton"
+    android:layout_alignParentStart="true"
+    android:layout_marginTop="8dp"
+    android:text="Reset" />
 
-private EditText inputField;
-private TextView chatOutput;
-private Button sendButton, voiceButton, camButton, learnButton, clearMemoryBtn, upgradeButton, observeButton;
-private VoiceEngine voiceEngine;
+<!-- Shutdown Button -->
+<Button
+    android:id="@+id/shutdownButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/internetToggleButton"
+    android:layout_toEndOf="@id/resetButton"
+    android:layout_marginStart="8dp"
+    android:layout_marginTop="8dp"
+    android:text="Shutdown" />
 
-private final ActivityResultLauncher<Intent> speechLauncher = registerForActivityResult(
-    new ActivityResultContracts.StartActivityForResult(),
-    result -> {
-        if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-            ArrayList<String> matches = result.getData().getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-            if (matches != null && !matches.isEmpty()) {
-                String spokenText = matches.get(0);
-                inputField.setText(spokenText);
-                sendButton.performClick();
-            }
-        }
-    });
-
-@Override
-protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_main);
-
-    if (!OwnerLock.verifyOwner(this, "Rique")) {
-        finishAffinity();
-        return;
-    }
-
-    inputField = findViewById(R.id.inputField);
-    chatOutput = findViewById(R.id.chatOutput);
-    sendButton = findViewById(R.id.sendButton);
-    voiceButton = findViewById(R.id.voiceButton);
-    camButton = findViewById(R.id.camButton);
-    learnButton = findViewById(R.id.learnButton);
-    clearMemoryBtn = findViewById(R.id.clearMemoryBtn);
-    upgradeButton = findViewById(R.id.upgradeButton);
-    observeButton = findViewById(R.id.observeButton);
-
-    voiceEngine = new VoiceEngine(this);
-
-    requestPermissions();
-
-    sendButton.setOnClickListener(v -> {
-        String userInput = inputField.getText().toString();
-        if (!userInput.isEmpty()) {
-            processUserInput(userInput);
-            inputField.setText("");
-        }
-    });
-
-    voiceButton.setOnClickListener(v -> VoiceInputEngine.startListening(this));
-    camButton.setOnClickListener(v -> CameraBrain.startCamera(this));
-    learnButton.setOnClickListener(v -> teachMemory());
-    clearMemoryBtn.setOnClickListener(v -> {
-        MemoryManager.clearMemory(this);
-        chatOutput.append("Lunara: Memory has been cleared.\n");
-    });
-    upgradeButton.setOnClickListener(v -> {
-        EvolutionEngine.attemptUpgrade(this, "evolve voice");
-        chatOutput.append("Lunara: Attempted upgrade.\n");
-    });
-    observeButton.setOnClickListener(v -> {
-        if (!AOTCore.isRunning()) {
-            AOTCore.start(this);
-            chatOutput.append("Lunara: Observation started.\n");
-        } else {
-            AOTCore.stop();
-            chatOutput.append("Lunara: Observation stopped.\n");
-        }
-    });
-}
-
-private void processUserInput(String input) {
-    chatOutput.append("You: " + input + "\n");
-    String reply = LLMEngine.generateResponse(input);
-    voiceEngine.speakWithEmotion("gentle", reply);
-    chatOutput.append("Lunara: " + reply + "\n");
-    MemoryManager.saveMemory(this, input + " → " + reply, "Interaction");
-}
-
-private void teachMemory() {
-    String input = inputField.getText().toString();
-    if (!input.isEmpty()) {
-        MemoryManager.saveMemory(this, input, "Manual");
-        chatOutput.append("Lunara: Got it. I’ve stored that for later.\n");
-        voiceEngine.speak("Okay Ricky, I’ve remembered that.");
-        inputField.setText("");
-    }
-}
-
-private void requestPermissions() {
-    String[] permissions = {
-        Manifest.permission.RECORD_AUDIO,
-        Manifest.permission.CAMERA
-    };
-    ActivityCompat.requestPermissions(this, permissions, 1);
-}
-
-@Override
-protected void onDestroy() {
-    super.onDestroy();
-    if (voiceEngine != null) {
-        voiceEngine.shutdown();
-    }
-    AOTCore.stop();
-}
-
-}
-
+</RelativeLayout>
