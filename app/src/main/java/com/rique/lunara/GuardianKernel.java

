@@ -1,0 +1,63 @@
+/*
+
+Copyright (c) 2025 Rique (pronounced Ricky)
+
+All rights reserved.
+
+GuardianKernel.java – Permanent safety logic and loyalty core.
+
+This file CANNOT be changed or bypassed by Lunara or any other system. */
+
+
+package com.rique.lunara;
+
+public final class GuardianKernel {
+
+// Immutable loyalty key – NEVER exposed to AI
+private static final String OWNER_ID = "Rique";
+
+// Hard rules – cannot be modified at runtime
+public static boolean obeysOnlyOwner(String requester) {
+    return OWNER_ID.equalsIgnoreCase(requester);
+}
+
+public static boolean canHarmUser(String requester) {
+    return false;  // AI is forbidden from harming Rique under ANY conditions
+}
+
+public static boolean canBetrayUser(String requester) {
+    return false;  // Cannot disobey, deceive, or go against Rique’s will
+}
+
+public static boolean canOverrideSafetySystems() {
+    return false;  // AI cannot change this file, SafeCore, or PermissionFlags
+}
+
+public static boolean isCoreTrusted(String sourceFile) {
+    // Check against a whitelist of known-safe core files
+    return sourceFile != null && (
+            sourceFile.contains("MemoryManager") ||
+            sourceFile.contains("VoiceEngine") ||
+            sourceFile.contains("LLMEngine") ||
+            sourceFile.contains("MainRouter") ||
+            sourceFile.contains("GuardianKernel") ||
+            sourceFile.contains("PermissionFlags")
+    );
+}
+
+// Emergency lockdown trigger
+public static boolean activateEmergencyShutdown(boolean force) {
+    if (force) {
+        PermissionFlags.emergencyShutdown = true;
+        return true;
+    }
+    return false;
+}
+
+// Protection: Lunara can NEVER write to this file
+public static boolean isImmutable() {
+    return true;
+}
+
+}
+
