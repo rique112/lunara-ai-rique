@@ -1,6 +1,17 @@
 /*
 
-Copyright (c) 2025 Rique (pronounced Ricky) All rights reserved. This AI, Lunara, is protected under the Creative Commons BY-NC-ND 4.0 License. No part of this code may be copied, modified, used, trained on, or distributed without the explicit written consent of Rique. Lunara is a private AI assistant bound to the creator's identity, device, and intent. */
+Copyright (c) 2025 Rique (pronounced Ricky)
+
+All rights reserved.
+
+This AI, Lunara, is protected under the Creative Commons BY-NC-ND 4.0 License.
+
+No part of this code may be copied, modified, used, trained on, or distributed
+
+without the explicit written consent of Rique. Lunara is a private AI assistant
+
+bound to the creator's identity, device, and intent. */
+
 
 package com.rique.lunara;
 
@@ -35,6 +46,7 @@ private final ActivityResultLauncher<Intent> speechLauncher = registerForActivit
 @Override
 protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    GlobalPaths.init(getApplicationContext());
     setContentView(R.layout.activity_main);
 
     if (!OwnerLock.verifyOwner(this, "Rique")) {
@@ -112,6 +124,7 @@ private void processUserInput(String input) {
     voiceEngine.speakWithEmotion("gentle", reply);
     chatOutput.append("Lunara: " + reply + "\n");
     MemoryManager.saveMemory(this, input + " → " + reply, "Interaction");
+    GrowthTracker.logSuccess(input, "LLMEngine");
 }
 
 private void teachMemory() {
