@@ -1,67 +1,104 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
-    Copyright (c) 2025 Rique (pronounced Ricky)
-    All rights reserved.
-    This file is part of the Lunara AI system.
-    Redistribution, modification, or unauthorized use is strictly prohibited.
-    Designed to support full AI capabilities: voice, camera, memory, evolution, analysis, updates, and protection.
--->
+<?xml version="1.0" encoding="utf-8"?><RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:padding="16dp"
+tools:context=".MainActivity">
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.rique.lunara">
+<!-- Chat Output -->
+<TextView
+    android:id="@+id/chatOutput"
+    android:layout_width="match_parent"
+    android:layout_height="250dp"
+    android:layout_alignParentTop="true"
+    android:background="#111111"
+    android:textColor="#FFFFFF"
+    android:textSize="16sp"
+    android:padding="10dp"
+    android:scrollbars="vertical"
+    android:text="Lunara is waiting..." />
 
-    <!-- Permissions for full AI abilities -->
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="28"/>
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
-        tools:ignore="ScopedStorage" />
+<!-- Input Field -->
+<EditText
+    android:id="@+id/inputField"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/chatOutput"
+    android:hint="Say something..."
+    android:background="#222222"
+    android:textColor="#FFFFFF"
+    android:textColorHint="#888888"
+    android:padding="10dp"
+    android:textSize="16sp" />
 
-    <!-- Features for device hardware -->
-    <uses-feature android:name="android.hardware.camera.any" />
-    <uses-feature android:name="android.hardware.microphone" android:required="true" />
-    <uses-feature android:name="android.hardware.screen.portrait" android:required="false" />
+<!-- Send Button -->
+<Button
+    android:id="@+id/sendButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/inputField"
+    android:layout_alignParentStart="true"
+    android:text="Send" />
 
-    <application
-        android:allowBackup="true"
-        android:label="Lunara AI"
-        android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        android:theme="@style/Theme.LunaraAI"
-        android:usesCleartextTraffic="true">
+<!-- Voice Button -->
+<Button
+    android:id="@+id/voiceButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/inputField"
+    android:layout_toEndOf="@id/sendButton"
+    android:layout_marginStart="8dp"
+    android:text="Voice" />
 
-        <!-- Main launcher activity -->
-        <activity
-            android:name=".MainActivity"
-            android:exported="true"
-            android:configChanges="keyboardHidden|orientation|screenSize">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </activity>
+<!-- Camera Button -->
+<Button
+    android:id="@+id/camButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/inputField"
+    android:layout_toEndOf="@id/voiceButton"
+    android:layout_marginStart="8dp"
+    android:text="Camera" />
 
-        <!-- Optional desktop companion launcher activity -->
-        <activity
-            android:name=".LunaraGUI"
-            android:exported="false"
-            android:theme="@style/Theme.LunaraAI.Dark" />
+<!-- Learn Button -->
+<Button
+    android:id="@+id/learnButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/inputField"
+    android:layout_toEndOf="@id/camButton"
+    android:layout_marginStart="8dp"
+    android:text="Learn" />
 
-        <!-- Background AI service -->
-        <service
-            android:name=".LunaraService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="microphone|camera|dataSync|mediaPlayback"/>
+<!-- Clear Memory Button -->
+<Button
+    android:id="@+id/clearMemoryBtn"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/inputField"
+    android:layout_toEndOf="@id/learnButton"
+    android:layout_marginStart="8dp"
+    android:text="Clear" />
 
-    </application>
+<!-- Upgrade Button -->
+<Button
+    android:id="@+id/upgradeButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/sendButton"
+    android:layout_alignParentStart="true"
+    android:layout_marginTop="8dp"
+    android:text="Upgrade" />
 
-</manifest>
+<!-- Observe Button -->
+<Button
+    android:id="@+id/observeButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/sendButton"
+    android:layout_toEndOf="@id/upgradeButton"
+    android:layout_marginStart="8dp"
+    android:layout_marginTop="8dp"
+    android:text="Observe" />
+
+</RelativeLayout>
