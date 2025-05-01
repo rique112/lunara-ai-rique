@@ -1,109 +1,42 @@
-package com.rique.lunaraai.core;
+// Copyright (c) 2025 Rique (pronounced Ricky) - All Rights Reserved // Lunara AI - Internet Search and Code Analyzer
 
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.Scanner;
+package com.rique.lunara;
 
-/**
- * Copyright (c) 2025 Rique.
- * All rights reserved.
- * Private AI Development: Project Lunara
- * Unauthorized use, copy, modification, or distribution is prohibited.
- *
- * SearchBrain - Allows Lunara to perform controlled, permission-based internet searches,
- * save search results locally, and analyze information for learning purposes.
- */
+import android.content.Context; import android.os.AsyncTask; import android.util.Log; import android.widget.Toast;
+
+import org.jsoup.Jsoup; import org.jsoup.nodes.Document; import org.jsoup.select.Elements;
+
+import java.io.IOException;
 
 public class SearchBrain {
 
-    private static final String SEARCH_MEMORY_FOLDER = "LunaraSearchMemory";
+private static final String TAG = "SearchBrain";
 
-    /**
-     * Perform a basic search and save results
-     */
-    public static void performSearch(String query) {
-        System.out.println("SearchBrain: Preparing to search for: " + query);
-
-        if (!isInternetAllowed()) {
-            System.out.println("SearchBrain: Internet search is disabled by user.");
-            return;
-        }
-
-        try {
-            String results = fakeSearch(query); // Use a real API later if you want
-            saveSearchMemory(query, results);
-            System.out.println("SearchBrain: Search completed and saved successfully.");
-        } catch (Exception e) {
-            System.err.println("SearchBrain Error: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Fake search method for now (simulates finding results)
-     */
-    private static String fakeSearch(String query) {
-        // Simulate finding basic information
-        return "Results found for '" + query + "': [Simulated information about " + query + "].";
-    }
-
-    /**
-     * (Optional) Real search method if connected to a search API in the future
-     */
-    private static String realInternetSearch(String query) throws IOException {
-        URL url = new URL("https://api.duckduckgo.com/?q=" + query + "&format=text");
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("GET");
-
-        Scanner scanner = new Scanner(connection.getInputStream());
-        StringBuilder result = new StringBuilder();
-        while (scanner.hasNextLine()) {
-            result.append(scanner.nextLine()).append("\n");
-        }
-        scanner.close();
-        return result.toString();
-    }
-
-    /**
-     * Save the search result into a local file
-     */
-    private static void saveSearchMemory(String query, String result) {
-        try {
-            String baseDir = System.getProperty("user.home") + File.separator + SEARCH_MEMORY_FOLDER;
-            File dir = new File(baseDir);
-            if (!dir.exists()) {
-                dir.mkdirs();
+public static void searchAndLearn(Context context, String query) {
+    new AsyncTask<Void, Void, String>() {
+        @Override
+        protected String doInBackground(Void... voids) {
+            try {
+                String url = "https://www.google.com/search?q=" + query.replace(" ", "+");
+                Document doc = Jsoup.connect(url)
+                        .userAgent("Mozilla/5.0")
+                        .get();
+                Elements results = doc.select("h3");
+                return results.size() > 0 ? results.get(0).text() : "No results found.";
+            } catch (IOException e) {
+                Log.e(TAG, "Search error: " + e.getMessage());
+                return "Search failed: " + e.getMessage();
             }
-
-            String filename = "search_" + sanitizeFilename(query) + "_" + System.currentTimeMillis() + ".txt";
-            File file = new File(dir, filename);
-
-            FileWriter writer = new FileWriter(file);
-            writer.write("Query: " + query + "\n");
-            writer.write("Result:\n" + result);
-            writer.close();
-
-            System.out.println("SearchBrain: Search saved to " + file.getAbsolutePath());
-
-        } catch (IOException e) {
-            System.err.println("SearchBrain Save Error: " + e.getMessage());
-            e.printStackTrace();
         }
-    }
 
-    /**
-     * Sanitize a filename by replacing illegal characters
-     */
-    private static String sanitizeFilename(String input) {
-        return input.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
-    }
-
-    /**
-     * Check if internet use is allowed (manual switch — private AI respect)
-     */
-    private static boolean isInternetAllowed() {
-        // YOU control this manually for now
-        return false; // Set to true if you allow searching
-    }
+        @Override
+        protected void onPostExecute(String result) {
+            Toast.makeText(context, "Search result: " + result, Toast.LENGTH_LONG).show();
+            MemoryManager.saveLearning(context, "Search: " + query + "\nResult: " + result);
+            VoiceEngine.speakStatic(context, "I learned something from that search, Rique.");
+        }
+    }.execute();
 }
+
+}
+
