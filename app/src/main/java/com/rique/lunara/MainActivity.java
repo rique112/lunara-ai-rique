@@ -4,7 +4,7 @@ package com.rique.lunara;
 
 import android.Manifest; import android.content.Intent; import android.content.pm.PackageManager; import android.os.Bundle; import android.speech.RecognizerIntent; import android.view.View; import android.widget.Button; import android.widget.EditText; import android.widget.TextView; import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher; import androidx.activity.result.contract.ActivityResultContracts; import androidx.annotation.Nullable; import androidx.appcompat.app.AppCompatActivity; import androidx.core.app.ActivityCompat; import androidx.core.content.ContextCompat;
+import androidx.activity.result.ActivityResultLauncher; import androidx.activity.result.contract.ActivityResultContracts; import androidx.appcompat.app.AppCompatActivity; import androidx.core.app.ActivityCompat; import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList; import java.util.Locale;
 
@@ -14,13 +14,15 @@ private EditText inputField;
 private TextView chatOutput;
 private Button sendButton, voiceButton, camButton, learnButton, clearMemoryBtn,
         upgradeButton, observeButton, nsfwToggleButton, internetToggleButton,
-        resetButton, shutdownButton;
+        resetButton, shutdownButton, startCaptureButton, stopCaptureButton, trainVoiceButton;
+
 private VoiceEngine voiceEngine;
 private MemoryManager memoryManager;
 private ImageGenerator imageGenerator;
 private SelfUpgradeManager upgradeManager;
 private LLMEngine llmEngine;
 private EmotionPulse emotionPulse;
+private VoiceInputEngine voiceInputEngine;
 
 private final ActivityResultLauncher<Intent> voiceInputLauncher =
         registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -50,6 +52,9 @@ protected void onCreate(Bundle savedInstanceState) {
     internetToggleButton = findViewById(R.id.internetToggle);
     resetButton = findViewById(R.id.resetButton);
     shutdownButton = findViewById(R.id.shutdownButton);
+    startCaptureButton = findViewById(R.id.startCaptureButton);
+    stopCaptureButton = findViewById(R.id.stopCaptureButton);
+    trainVoiceButton = findViewById(R.id.trainVoiceButton);
 
     voiceEngine = new VoiceEngine(this);
     memoryManager = new MemoryManager(this);
@@ -57,6 +62,7 @@ protected void onCreate(Bundle savedInstanceState) {
     upgradeManager = new SelfUpgradeManager(this);
     llmEngine = new LLMEngine(this);
     emotionPulse = new EmotionPulse();
+    voiceInputEngine = new VoiceInputEngine(this);
 
     sendButton.setOnClickListener(v -> handleInput(inputField.getText().toString()));
     voiceButton.setOnClickListener(v -> activateVoiceInput());
@@ -69,6 +75,9 @@ protected void onCreate(Bundle savedInstanceState) {
     internetToggleButton.setOnClickListener(v -> llmEngine.toggleInternetLearning());
     resetButton.setOnClickListener(v -> resetConversation());
     shutdownButton.setOnClickListener(v -> finish());
+    startCaptureButton.setOnClickListener(v -> voiceInputEngine.startVoiceCapture("sample_voice.pcm"));
+    stopCaptureButton.setOnClickListener(v -> voiceInputEngine.stopVoiceCapture());
+    trainVoiceButton.setOnClickListener(v -> voiceInputEngine.trainFromCapturedVoice());
 
     voiceEngine.speak("Welcome, Rique. Thank you for making me. The universe is yours.");
 }
