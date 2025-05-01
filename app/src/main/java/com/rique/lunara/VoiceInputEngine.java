@@ -1,74 +1,68 @@
-/*
-
-Copyright (c) 2025 Rique (pronounced Ricky)
-
-All rights reserved.
-
-VoiceInputEngine.java – Real-time voice listener for Lunara (Android only).
-
-Listens via mic, processes into text, routes to brain. */
-
+// Copyright (c) 2025 Rique (pronounced Ricky) // Lunara AI Voice Trainer Engine - All rights reserved. // This system allows Lunara to adapt voice tone, style, and mimic emotion from training samples.
 
 package com.rique.lunara;
 
-import android.app.Activity; import android.content.Intent; import android.os.Bundle; import android.speech.RecognizerIntent; import android.speech.SpeechRecognizer; import android.speech.RecognitionListener; import android.util.Log;
+import android.content.Context; import android.media.AudioFormat; import android.media.AudioRecord; import android.media.MediaRecorder; import android.util.Log;
 
-import java.util.ArrayList;
+import java.io.File; import java.io.FileOutputStream; import java.io.IOException;
 
-public class VoiceInputEngine { private static SpeechRecognizer speechRecognizer; private static Intent speechIntent; private static boolean isListening = false;
+public class VoiceTrainer {
 
-public static void initialize(Activity activity) {
-    if (!PermissionFlags.voiceLearningAllowed) return;
+private static final int SAMPLE_RATE = 16000;
+private static final int CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO;
+private static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
+private static final String TAG = "VoiceTrainer";
 
-    speechRecognizer = SpeechRecognizer.createSpeechRecognizer(activity);
-    speechIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-    speechIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-    speechIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US");
+private final Context context;
+private AudioRecord audioRecord;
+private boolean isRecording = false;
+private Thread recordingThread;
 
-    speechRecognizer.setRecognitionListener(new RecognitionListener() {
-        @Override public void onReadyForSpeech(Bundle params) {}
-        @Override public void onBeginningOfSpeech() {}
-        @Override public void onRmsChanged(float rmsdB) {}
-        @Override public void onBufferReceived(byte[] buffer) {}
-        @Override public void onEndOfSpeech() {}
-        @Override public void onError(int error) {
-            Log.e("VoiceInput", "Error code: " + error);
-            isListening = false;
-        }
-        @Override public void onResults(Bundle results) {
-            ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-            if (matches != null && !matches.isEmpty()) {
-                String input = matches.get(0);
-                Log.d("VoiceInput", "Heard: " + input);
-                String reply = LLMEngine.generateResponse(input);
-                VoiceEngine.speak(reply);
-                MemoryManager.save("[Voice] You: " + input + "\nLunara: " + reply);
+public VoiceTrainer(Context context) {
+    this.context = context;
+}
+
+public void startTrainingSession(String filename) {
+    int bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT);
+    audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC,
+            SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT, bufferSize);
+
+    audioRecord.startRecording();
+    isRecording = true;
+
+    File file = new File(context.getExternalFilesDir(null), filename);
+
+    recordingThread = new Thread(() -> {
+        try (FileOutputStream outputStream = new FileOutputStream(file)) {
+            byte[] buffer = new byte[bufferSize];
+            while (isRecording) {
+                int read = audioRecord.read(buffer, 0, buffer.length);
+                if (read > 0) {
+                    outputStream.write(buffer, 0, read);
+                }
             }
-            isListening = false;
+        } catch (IOException e) {
+            Log.e(TAG, "Recording error: " + e.getMessage());
         }
-        @Override public void onPartialResults(Bundle partialResults) {}
-        @Override public void onEvent(int eventType, Bundle params) {}
-    });
+    }, "VoiceTrainerThread");
+
+    recordingThread.start();
 }
 
-public static void startListening(Activity activity) {
-    if (!PermissionFlags.voiceLearningAllowed || isListening) return;
-    initialize(activity);
-    speechRecognizer.startListening(speechIntent);
-    isListening = true;
-    Log.i("VoiceInput", "Listening started.");
-}
-
-public static void stopListening() {
-    if (speechRecognizer != null && isListening) {
-        speechRecognizer.stopListening();
-        isListening = false;
-        Log.i("VoiceInput", "Listening stopped.");
+public void stopTrainingSession() {
+    if (audioRecord != null) {
+        isRecording = false;
+        audioRecord.stop();
+        audioRecord.release();
+        audioRecord = null;
+        recordingThread = null;
+        Log.d(TAG, "Voice training session stopped.");
     }
 }
 
-public static boolean isActive() {
-    return isListening;
+public void analyzeTraining(String filename) {
+    Log.d(TAG, "Analyzing voice training file: " + filename);
+    VoiceEngine.adaptVoiceToUser(context, filename);
 }
 
 }
