@@ -17,6 +17,7 @@ private final Context context;
 private AudioRecord audioRecord;
 private boolean isRecording = false;
 private Thread recordingThread;
+private File trainingFile;
 
 public VoiceTrainer(Context context) {
     this.context = context;
@@ -30,10 +31,13 @@ public void startTrainingSession(String filename) {
     audioRecord.startRecording();
     isRecording = true;
 
-    File file = new File(context.getExternalFilesDir(null), filename);
+    File dir = new File(context.getExternalFilesDir(null), "Lunara/voices");
+    if (!dir.exists()) dir.mkdirs();
+
+    trainingFile = new File(dir, filename);
 
     recordingThread = new Thread(() -> {
-        try (FileOutputStream outputStream = new FileOutputStream(file)) {
+        try (FileOutputStream outputStream = new FileOutputStream(trainingFile)) {
             byte[] buffer = new byte[bufferSize];
             while (isRecording) {
                 int read = audioRecord.read(buffer, 0, buffer.length);
@@ -47,6 +51,7 @@ public void startTrainingSession(String filename) {
     }, "VoiceTrainerThread");
 
     recordingThread.start();
+    Log.d(TAG, "Voice training session started: " + trainingFile.getAbsolutePath());
 }
 
 public void stopTrainingSession() {
@@ -62,7 +67,7 @@ public void stopTrainingSession() {
 
 public void analyzeTraining(String filename) {
     Log.d(TAG, "Analyzing voice training file: " + filename);
-    VoiceEngine.adaptVoiceToUser(context, filename);
+    VoiceInputEngine.adaptVoiceToUser(context, filename);
 }
 
 }
