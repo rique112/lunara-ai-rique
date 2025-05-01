@@ -1,5 +1,6 @@
 <!--
   Copyright (c) 2025 Rique (pronounced Ricky)
+  Trademark: Lunara AI ™
   All rights reserved.
   This manifest is part of the Lunara AI system.
   Unauthorized use, modification, or distribution is strictly prohibited.
@@ -9,26 +10,46 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.rique.lunara">
 
-    <!-- Required Permissions for Full AI Functionality -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!-- Core Permissions -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- Optional but recommended -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
 
     <application
+        android:name=".LunaraApp"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
         android:label="Lunara AI"
+        android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
 
-        <activity android:name=".MainActivity">
+        <!-- Main AI Interface -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
+        <!-- Optional: Background observer / upgrade service -->
+        <service
+            android:name=".LunaraBackgroundService"
+            android:exported="false"
+            android:foregroundServiceType="microphone|camera|dataSync" />
+
     </application>
+
 </manifest>
