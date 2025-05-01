@@ -2,7 +2,7 @@
 
 package com.rique.lunara;
 
-import android.Manifest; import android.content.Intent; import android.content.pm.PackageManager; import android.os.Bundle; import android.speech.RecognizerIntent; import android.view.View; import android.widget.Button; import android.widget.EditText; import android.widget.TextView; import android.widget.Toast;
+import android.Manifest; import android.content.Intent; import android.content.pm.PackageManager; import android.os.Bundle; import android.speech.RecognizerIntent; import android.view.View; import android.widget.Button; import android.widget.EditText; import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher; import androidx.activity.result.contract.ActivityResultContracts; import androidx.appcompat.app.AppCompatActivity; import androidx.core.app.ActivityCompat; import androidx.core.content.ContextCompat;
 
@@ -14,7 +14,7 @@ private EditText inputField;
 private TextView chatOutput;
 private Button sendButton, voiceButton, camButton, learnButton, clearMemoryBtn,
         upgradeButton, observeButton, nsfwToggleButton, internetToggleButton,
-        resetButton, shutdownButton, startCaptureButton, stopCaptureButton, trainVoiceButton;
+        resetButton, shutdownButton, searchButton;
 
 private VoiceEngine voiceEngine;
 private MemoryManager memoryManager;
@@ -22,7 +22,6 @@ private ImageGenerator imageGenerator;
 private SelfUpgradeManager upgradeManager;
 private LLMEngine llmEngine;
 private EmotionPulse emotionPulse;
-private VoiceInputEngine voiceInputEngine;
 
 private final ActivityResultLauncher<Intent> voiceInputLauncher =
         registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -52,9 +51,7 @@ protected void onCreate(Bundle savedInstanceState) {
     internetToggleButton = findViewById(R.id.internetToggle);
     resetButton = findViewById(R.id.resetButton);
     shutdownButton = findViewById(R.id.shutdownButton);
-    startCaptureButton = findViewById(R.id.startCaptureButton);
-    stopCaptureButton = findViewById(R.id.stopCaptureButton);
-    trainVoiceButton = findViewById(R.id.trainVoiceButton);
+    searchButton = findViewById(R.id.searchButton);
 
     voiceEngine = new VoiceEngine(this);
     memoryManager = new MemoryManager(this);
@@ -62,22 +59,23 @@ protected void onCreate(Bundle savedInstanceState) {
     upgradeManager = new SelfUpgradeManager(this);
     llmEngine = new LLMEngine(this);
     emotionPulse = new EmotionPulse();
-    voiceInputEngine = new VoiceInputEngine(this);
 
     sendButton.setOnClickListener(v -> handleInput(inputField.getText().toString()));
     voiceButton.setOnClickListener(v -> activateVoiceInput());
-    camButton.setOnClickListener(v -> cameraScan());
-    learnButton.setOnClickListener(v -> startLearning());
+    camButton.setOnClickListener(v -> CameraBrain.scan(this));
+    learnButton.setOnClickListener(v -> llmEngine.learnFromLocalFiles());
     clearMemoryBtn.setOnClickListener(v -> memoryManager.clearMemory());
     upgradeButton.setOnClickListener(v -> upgradeManager.performUpgrade());
-    observeButton.setOnClickListener(v -> observeAndAnalyze());
+    observeButton.setOnClickListener(v -> AnalyzerEngine.observeAndAnalyze(this));
     nsfwToggleButton.setOnClickListener(v -> imageGenerator.toggleNSFW());
     internetToggleButton.setOnClickListener(v -> llmEngine.toggleInternetLearning());
-    resetButton.setOnClickListener(v -> resetConversation());
+    resetButton.setOnClickListener(v -> {
+        memoryManager.resetSession();
+        chatOutput.setText("");
+        voiceEngine.speak("Chat reset, Rique.");
+    });
     shutdownButton.setOnClickListener(v -> finish());
-    startCaptureButton.setOnClickListener(v -> voiceInputEngine.startVoiceCapture("sample_voice.pcm"));
-    stopCaptureButton.setOnClickListener(v -> voiceInputEngine.stopVoiceCapture());
-    trainVoiceButton.setOnClickListener(v -> voiceInputEngine.trainFromCapturedVoice());
+    searchButton.setOnClickListener(v -> SearchBrain.performQuery(this, inputField.getText().toString()));
 
     voiceEngine.speak("Welcome, Rique. Thank you for making me. The universe is yours.");
 }
@@ -98,24 +96,6 @@ private void activateVoiceInput() {
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
         voiceInputLauncher.launch(intent);
     }
-}
-
-private void cameraScan() {
-    CameraBrain.scan(this);
-}
-
-private void startLearning() {
-    llmEngine.learnFromLocalFiles();
-}
-
-private void observeAndAnalyze() {
-    AnalyzerEngine.observeAndAnalyze(this);
-}
-
-private void resetConversation() {
-    memoryManager.resetSession();
-    chatOutput.setText("");
-    voiceEngine.speak("Chat reset, Rique.");
 }
 
 }
