@@ -1,75 +1,70 @@
-// Copyright (c) 2025 Rique (pronounced Ricky) // Trademark Lunara AI ™ // All rights reserved. Unauthorized duplication prohibited.
+// Copyright (c) 2025 Rique (pronounced Ricky) // Lunara AI Voice Trainer Engine - All rights reserved. // This system allows Lunara to adapt voice tone, style, and mimic emotion from training samples.
 
 package com.rique.lunara;
 
-import android.media.MediaPlayer; import android.media.MediaRecorder; import android.os.Environment; import android.util.Log;
+import android.content.Context; import android.media.AudioFormat; import android.media.AudioRecord; import android.media.MediaRecorder; import android.util.Log;
 
-import java.io.File; import java.io.IOException; import java.util.HashMap;
+import java.io.File; import java.io.FileOutputStream; import java.io.IOException;
 
 public class VoiceTrainer {
 
+private static final int SAMPLE_RATE = 16000;
+private static final int CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO;
+private static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
 private static final String TAG = "VoiceTrainer";
-private MediaRecorder recorder;
-private MediaPlayer player;
-private String currentRecordingPath;
-private final HashMap<String, String> voiceProfiles = new HashMap<>();
 
-public VoiceTrainer() {
-    File dir = new File(Environment.getExternalStorageDirectory(), "Lunara/voices");
-    if (!dir.exists()) dir.mkdirs();
+private final Context context;
+private AudioRecord audioRecord;
+private boolean isRecording = false;
+private Thread recordingThread;
+
+public VoiceTrainer(Context context) {
+    this.context = context;
 }
 
-public void startRecording(String profileName) {
-    currentRecordingPath = Environment.getExternalStorageDirectory().getAbsolutePath()
-            + "/Lunara/voices/" + profileName + ".3gp";
-    recorder = new MediaRecorder();
-    recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-    recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-    recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-    recorder.setOutputFile(currentRecordingPath);
+public void startTrainingSession(String filename) {
+    int bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT);
+    audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC,
+            SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT, bufferSize);
 
-    try {
-        recorder.prepare();
-        recorder.start();
-        Log.d(TAG, "Recording started: " + currentRecordingPath);
-    } catch (IOException e) {
-        Log.e(TAG, "Recording failed", e);
+    audioRecord.startRecording();
+    isRecording = true;
+
+    File file = new File(context.getExternalFilesDir(null), filename);
+
+    recordingThread = new Thread(() -> {
+        try (FileOutputStream outputStream = new FileOutputStream(file)) {
+            byte[] buffer = new byte[bufferSize];
+            while (isRecording) {
+                int read = audioRecord.read(buffer, 0, buffer.length);
+                if (read > 0) {
+                    outputStream.write(buffer, 0, read);
+                }
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Recording error: " + e.getMessage());
+        }
+    }, "VoiceTrainerThread");
+
+    recordingThread.start();
+}
+
+public void stopTrainingSession() {
+    if (audioRecord != null) {
+        isRecording = false;
+        audioRecord.stop();
+        audioRecord.release();
+        audioRecord = null;
+        recordingThread = null;
+        Log.d(TAG, "Voice training session stopped.");
     }
 }
 
-public void stopRecording(String profileName) {
-    if (recorder != null) {
-        recorder.stop();
-        recorder.release();
-        recorder = null;
-        voiceProfiles.put(profileName, currentRecordingPath);
-        Log.d(TAG, "Recording saved for profile: " + profileName);
-    }
-}
-
-public void playVoiceSample(String profileName) {
-    String filePath = voiceProfiles.get(profileName);
-    if (filePath == null) {
-        Log.e(TAG, "No voice sample found for: " + profileName);
-        return;
-    }
-    player = new MediaPlayer();
-    try {
-        player.setDataSource(filePath);
-        player.prepare();
-        player.start();
-        Log.d(TAG, "Playing voice sample: " + profileName);
-    } catch (IOException e) {
-        Log.e(TAG, "Playback failed", e);
-    }
-}
-
-public boolean hasProfile(String profileName) {
-    return voiceProfiles.containsKey(profileName);
-}
-
-public String getVoicePath(String profileName) {
-    return voiceProfiles.get(profileName);
+public void analyzeTraining(String filename) {
+    // Placeholder: You can expand this to process pitch, tone, and style using ML/audio models
+    Log.d(TAG, "Analyzing voice training file: " + filename);
+    // Simulate adaptation trigger
+    VoiceEngine.adaptVoiceToUser(context, filename);
 }
 
 }
