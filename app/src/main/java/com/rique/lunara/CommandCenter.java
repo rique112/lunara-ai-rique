@@ -1,10 +1,8 @@
-/* Copyright (c) 2025 Rique (pronounced Ricky) All rights reserved. Lunara AI CommandCenter.java Gives you real control buttons: save memory, learn, analyze, upgrade, forget, shut down. This file connects to MemoryManager, GrowthTracker, AnalyzerEngine, and SelfUpgradeManager. Trademark: Lunara™ — evolving AI assistant created and protected by Rique. */
+// Copyright (c) 2025 Rique (pronounced Ricky) - All Rights Reserved // Lunara is a private AI bound to its creator. Do not duplicate or distribute.
 
 package com.rique.lunara;
 
 import android.app.Activity; import android.os.Bundle; import android.view.View; import android.widget.Button; import android.widget.EditText; import android.widget.Toast;
-
-import java.io.File;
 
 public class CommandCenter extends Activity {
 
