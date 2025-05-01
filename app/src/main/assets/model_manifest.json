@@ -1,9 +1,0 @@
-{
-  "default": "realistic-humans-nsfw.onnx",
-  "available_models": [
-    "realistic-anime-sfw.onnx",
-    "realistic-humans-nsfw.onnx",
-    "realistic-thick-body.onnx",
-    "realistic-demon-style.onnx"
-  ]
-}
