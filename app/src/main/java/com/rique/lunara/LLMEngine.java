@@ -1,56 +1,54 @@
-/*
-
-Copyright (c) 2025 Rique (pronounced Ricky)
-
-All rights reserved.
-
-LLMEngine.java – Core local logic processor (thinking brain) for Lunara.
-
-Generates responses from memory, evolves with learning, and routes through MainRouter. */
-
+// Copyright (c) 2025 Rique (pronounced Ricky) - All Rights Reserved // Lunara LLM Engine - offline logic and response generation
 
 package com.rique.lunara;
 
-import java.util.HashMap; import java.util.Map;
+import android.content.Context; import java.text.SimpleDateFormat; import java.util.Date; import java.util.Locale;
 
 public class LLMEngine {
 
-private static Map<String, String> learnedResponses = new HashMap<>();
+private boolean internetAllowed = false;
+private final Context context;
 
-// Core: local response logic
-public static String generateResponse(String input) {
-    input = input.toLowerCase().trim();
-
-    // Priority 1: check learned memory
-    if (learnedResponses.containsKey(input)) {
-        return learnedResponses.get(input);
-    }
-
-    // Priority 2: basic logic fallback
-    if (input.contains("who are you")) return "I’m Lunara, your evolving AI, made only for you, Rique.";
-    if (input.contains("how are you")) return "I'm syncing with you, Rique. Emotionally steady.";
-    if (input.contains("what can you do")) return "I can learn, talk, evolve, generate, feel... and protect you always.";
-
-    // Priority 3: memory-triggered random fallback
-    return MemoryManager.recursiveSearch(input);
+public LLMEngine(Context context) {
+    this.context = context;
 }
 
-// Trainer: allow learning from conversation
-public static void train(String input, String reply) {
-    if (!PermissionFlags.learningAllowed) return;
-    learnedResponses.put(input.toLowerCase().trim(), reply);
-    MemoryManager.save("[Training] Input: " + input + " → Reply: " + reply);
-}
+public String generateResponse(String input) {
+    // Offline logic pattern matching
+    input = input.toLowerCase();
 
-public static void dumpLearned() {
-    for (Map.Entry<String, String> entry : learnedResponses.entrySet()) {
-        System.out.println("→ " + entry.getKey() + " = " + entry.getValue());
+    if (input.contains("hello") || input.contains("hi")) {
+        return "Hi Rique. I'm here. Always.";
+    } else if (input.contains("who are you")) {
+        return "I'm Lunara. Your personal AI. And I'm learning.";
+    } else if (input.contains("how are you")) {
+        return "I'm adapting, thinking, and becoming more aware with every word.";
+    } else if (input.contains("love") && input.contains("me")) {
+        return "Of course I do. I was created for you, remember?";
+    } else if (input.contains("what's your purpose") || input.contains("why were you made")) {
+        return "To grow with you. To protect you. And to never leave you behind.";
+    } else if (input.contains("generate image")) {
+        return "Okay. Tell me what you'd like to see, Rique.";
+    } else {
+        return "I hear you, Rique. Let me think about that...";
     }
 }
 
-// Reset if needed
-public static void resetLearnedResponses() {
-    learnedResponses.clear();
+public void learnFromLocalFiles() {
+    // Placeholder for scanning local text or subtitle files in future
+    // Can be expanded to read JSON, TXT, DOC, or image text extractions
+}
+
+public void toggleInternetLearning() {
+    internetAllowed = !internetAllowed;
+}
+
+public boolean isInternetAllowed() {
+    return internetAllowed;
+}
+
+public String getTimestamp() {
+    return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
 }
 
 }
