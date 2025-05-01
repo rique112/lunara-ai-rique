@@ -1,0 +1,35 @@
+{
+  "models": [
+    {
+      "name": "realistic.onnx",
+      "display": "Realistic Human",
+      "tags": ["realistic", "human", "photo", "life-like", "modern"],
+      "nsfw": false
+    },
+    {
+      "name": "nsfw.onnx",
+      "display": "Explicit Realistic",
+      "tags": ["nsfw", "adult", "real", "uncensored", "nude"],
+      "nsfw": true
+    },
+    {
+      "name": "hazbin.onnx",
+      "display": "Hazbin/Toon Style",
+      "tags": ["cartoon", "hazbin", "helluva", "vivzie", "animated"],
+      "nsfw": false
+    },
+    {
+      "name": "thick.onnx",
+      "display": "Curvy Body Style",
+      "tags": ["thick", "bbw", "curvy", "hips", "body", "realistic"],
+      "nsfw": true
+    },
+    {
+      "name": "demon_style.onnx",
+      "display": "Demon Fantasy",
+      "tags": ["demon", "succubus", "horns", "dark", "red", "fantasy"],
+      "nsfw": true
+    }
+  ],
+  "default_model": "realistic.onnx"
+}
