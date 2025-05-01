@@ -3,31 +3,31 @@
     {
       "name": "realistic.onnx",
       "display": "Realistic Human",
-      "tags": ["realistic", "human", "photo", "life-like", "modern"],
+      "tags": ["realistic", "human", "photo", "life-like", "modern", "face", "girl", "man"],
       "nsfw": false
     },
     {
       "name": "nsfw.onnx",
       "display": "Explicit Realistic",
-      "tags": ["nsfw", "adult", "real", "uncensored", "nude"],
+      "tags": ["nsfw", "nude", "uncensored", "sex", "adult", "realistic", "boobs", "body", "thighs"],
       "nsfw": true
     },
     {
       "name": "hazbin.onnx",
-      "display": "Hazbin/Toon Style",
-      "tags": ["cartoon", "hazbin", "helluva", "vivzie", "animated"],
+      "display": "Hazbin Hotel / Toon Style",
+      "tags": ["hazbin", "helluva", "vivzie", "toon", "cartoon", "animated", "stylized"],
       "nsfw": false
     },
     {
       "name": "thick.onnx",
       "display": "Curvy Body Style",
-      "tags": ["thick", "bbw", "curvy", "hips", "body", "realistic"],
+      "tags": ["thick", "curvy", "bbw", "hips", "thighs", "booty", "busty"],
       "nsfw": true
     },
     {
       "name": "demon_style.onnx",
       "display": "Demon Fantasy",
-      "tags": ["demon", "succubus", "horns", "dark", "red", "fantasy"],
+      "tags": ["demon", "succubus", "horns", "fantasy", "hell", "dark", "red", "black", "wings"],
       "nsfw": true
     }
   ],
